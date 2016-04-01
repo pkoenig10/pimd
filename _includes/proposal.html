@@ -3,13 +3,153 @@
     <div class="container">
         <div class="row">
             <div class="col-lg-12">
-                <h2>Proposal</h2>
+                <h1>Proposal</h1>
             </div>
         </div>
+
+        <br>
+
         <div class="row">
-            <br>
             <div class="col-lg-12">
-                <p>Proposal text goes here.</p>
+                <h3>Summary</h3>
+
+                <p>We will implement a SIMD intrinsics library for the Broadcom VideoCoreIV-AG100-R GPU found on all Raspberry Pi models. We will compare the performance of common data parallel algorithms implemented with our library to implementations using the traditional ARM CPU in the Raspberry Pi.</p>
+            </div>
+        </div>
+
+        <br>
+
+        <div class="row">
+            <div class="col-lg-12">
+                <h3>Background</h3>
+
+                <p>In addition to a ARM CPU, all Raspberry Pi models have a VideoCore IV graphics processing unit. At the core of this architecture is a set of 12 special purpose floating-point shader processors, termed Quad Processors (QPUs). For all intents and purposes, each QPU can be regarded as a 16-way 32-bit SIMD processor with an instruction cycle time of four system clocks. Internally, each QPU is a 4-way SIMD processor multiplexed to 16-ways by executing the same instruction for four clock cycles on four different 4-way vectors. Each QPU is dual-issue and contains two independent (and asymmetric) ALU units, an 'add' unit and a 'mul' unit, allowing the QPU to perform on 32-bit floating-point vector add and one 32-bit floating-point vector multiply on each clock cycle.</p>
+
+                <br>
+
+                <p>The architecture of this GPU is designed specifically for multimedia processing, namely audio, video, and graphics. The QPUs are closely coupled to 3D hardware on the chip specifically for fragment shading. Raspbian, the primary operating system for the Raspberry Pi, provides hardware accelerated implementations of OpenGL ES 1.1, OpenGL Es 2.0, OpenVG 1.1, Open EGL, OpenMAX, and 1080p30 H.264 high-profile decoding which take advantage of this partially specialized hardware. There currently is no library for more general (non-multimedia) data parallel computation on the Raspberry Pi using the QPUs without the additional 3D computation hardware. Such a library would allow developers to massively improve the performance of data parallel algorithms on the Raspberry Pi by not limiting them to the single-core ARM CPU.</p>
+            </div>
+        </div>
+
+        <br>
+
+        <div class="row">
+            <div class="col-lg-12">
+                <h3>The Challenge</h3>
+
+                <p>The primary challenge of this project is gaining a sufficient understanding of the VideoCore IV GPU in order to implement a SIMD library using its architecture. Outside of the existing <a href="https://github.com/raspberrypi/userland">Raspberry Pi source code</a> and an <a href="http://www.broadcom.com/docs/support/videocore/VideoCoreIV-AG100-R.pdf">architecture reference guide</a> released by Broadcom, there is very little documentation about this hardware. Creating our library will require a great deal of reading and experimenting to determine what steps need to be taken in order to execute instructions on the GPU.</p>
+
+                <br>
+
+                <p>In addition, we will need to figure out how to access QPUs directly and avoid using unnecessary hardware components of the 3D pipeline on the GPU. The This is especially tricky because the hardware was designed for fragment shading in order to provide reasonably efficient implementation of the aforementioned libraries.  As a result, the existing source code (and to a lesser extent the architectural reference) will be less than perfectly helpful when writing our SIMD library.</p>
+
+                <br>
+
+                <p>We will also have to give careful consideration when defining the interface for our library.  We need to ensure that our library functions are specific enough to be mapped to the QPUs but general enough to allow our library to be used in a wide variety of data parallel problems.</p>
+            </div>
+        </div>
+
+        <br>
+
+        <div class="row">
+            <div class="col-lg-12">
+                <h3>Resources</h3>
+
+                <p>We be running and testing our code on Raspberry Pi 2 Model B.  Our code base will start from scratch but will rely on the GPU interface functions defined in the <a href="https://github.com/raspberrypi/userland">Raspberry Pi userland source code</a>. We will also be heavily using the official Broadcom <a href="http://www.broadcom.com/docs/support/videocore/VideoCoreIV-AG100-R.pdf">VideoCore IV 3D Architecture Reference</a> while investigating ways to interface with the GPU.</p>
+            </div>
+        </div>
+
+        <br>
+
+        <div class="row">
+            <div class="col-lg-12">
+                <h3>Goals and Deliverables</h3>
+
+                <br>
+
+                <h4>Plan to Achieve</h4>
+
+                <ul>
+                    <li>Gain an understanding of the architecture of the VideoCore IV 3D GPU and how its hardware can be used for parallel execution.</li>
+                    <li>Successfully run code on the GPU, using the QPUs to process vectors of data.</li>
+                    <li>Use our understanding of the hardware architecture and interface to define an interface for a SIMD library that allows for general data parallel execution on the QPUs.</li>
+                    <li>Implement our SIMD library according to the interface we have defined.</li>
+                    <li>Benchmark the performance of common data parallel algorithms using our library. Compare the performance of our library to CPU-only implementations and implementations using existing libraries on the Raspberry Pi.</li>
+                </ul>
+
+                <br>
+
+                <h4>Hope to Achieve</h4>
+
+                <ul>
+                    <li>Extend our library to support two hardware threads. Each QPU supports two hardware threads.</li>
+                    <li>Use the Texture and Memory lookup Units (TMUs) for possible faster reads from main memory. Reads and writes from main memory are typical done using the Vertex Cache Manager & DMA (VCM & VCD) and the VPM DMA writer (VDW). The TPUs only supports main memory lookups but share an 256KB L2 cache which may allow for faster reads, especially in out-of-place algorithms.</li>
+                </ul>
+
+                <br>
+
+                <p>Our library should make it possible to implement a wide variety of data-parallel algorithms to run on the Raspberry Pi and achieve better performance than implementations that run only on the ARM CPU. Ignoring memory latency and sources of overhead, perfect speedup for our library using the 12 250MHz QPUs over the single 900MHz CPU is 3.33x. More practically, we hope to achieve at least a 2x speedup on completely data parallel algorithms. Ideally we would like to see a 2.5x-3x speedup after further optimizing our library.</p>
+
+                <br>
+
+                <p>We will demo our library by explaining the interface and types and functions it contains. We will show speedup graphs of our library on various data parallel algorithms and possibly show program output if our tests produce compelling results.</p>
+            </div>
+        </div>
+
+        <br>
+
+        <div class="row">
+            <div class="col-lg-12">
+                <h3>Platform Choice</h3>
+
+                <p>We will be writing and testing our code through Raspbian running on a <a href="https://www.raspberrypi.org/products/raspberry-pi-2-model-b/">Raspberry Pi 2 Model B</a> for obvious reasons. The majority of our library will be written in C, likely with some C++ or Assembly, as these are prototypical system languages and the ones used in the Raspberry Pi source code to interface with the GPU.</p>
+            </div>
+        </div>
+
+        <br>
+
+        <div class="row">
+            <div class="col-lg-12">
+                <h3>Schedule</h3>
+
+                <br>
+
+                <h4>Week 1</h4>
+                <ul>
+                    <li>Read through the architecture reference and Raspberry Pi userland source code to gain a high-level understanding of the GPU pipeline on the Raspberry Pi.</li>
+                    <li>Pull code form an existing library and attempt to reduce it to the bare minimum needed to successfully run on the GPU. Determine what each line of code does and its importance to the overall pipeline.</li>
+                </ul>
+
+                <br>
+
+                <h4>Week 2</h4>
+                <ul>
+                    <li>Define a limited number of extremely simple SIMD functions that will be the core of our library. Carefully define types that strike an appropriate balance between being general and being easily mapped to the GPU hardware.</li>
+                    <li>Begin implementing our minimal library by writing code form scratch that will interface with the GPU.</li>
+                </ul>
+
+                <br>
+
+                <h4>Week 3</h4>
+                <ul>
+                    <li>Continue implementing our minimal library and run tests to ensure that it is correct and robust to a variety of inputs.</li>
+                    <li>Add more complex function to our library where we feel they would be useful and/or necessary when implementing some common data parallel algorithms.</li>
+                </ul>
+
+                <br>
+
+                <h4>Week 4</h4>
+                <ul>
+                    <li>Finish implementing any parts of the library we added the previous week.</li>
+                    <li>Implement a handful of highly data parallel algorithms using our library and using CPU only code.  Compare performance over a variety of input sizes and observe speedup when using the GPU.</li>
+                </ul>
+
+                <br>
+
+                <h4>Week 5</h4>
+                <ul>
+                    <li>If we have extra time, consider extending our library to either 1) add support for running two hardware threads on the QPUs or 2) use the TMUs and shared L2 to achieve faster main memory lookups on the GPU.</li>
+                </ul>
             </div>
         </div>
     </div>
