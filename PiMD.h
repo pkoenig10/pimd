@@ -28,4 +28,9 @@ class PiMD_GPU{
     virtual void store_mem(); 
 }
 
+class DataVector {
+    v
+
+}
+
 #endif
