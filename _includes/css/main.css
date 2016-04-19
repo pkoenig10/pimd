@@ -29,6 +29,15 @@ a.active {
     color: #{{ site.color.primary }};
 }
 
+section.success a,
+section.success a:hover,
+section.success a:focus,
+section.success a:active,
+section.success a.active {
+    outline: 0;
+    color: #{{ site.color.secondary }};
+}
+
 h1,
 h2,
 h3,
@@ -159,6 +168,11 @@ section h1 {
 section.success {
     color: #fff;
     background: #{{ site.color.primary }};
+}
+
+section.success h1 {
+    margin: 0;
+    border-bottom: 4px solid #fff;
 }
 
 @media(max-width:767px) {

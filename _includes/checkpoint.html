@@ -3,13 +3,56 @@
     <div class="container">
         <div class="row">
             <div class="col-lg-12">
-                <h2>Checkpoint</h2>
+                <h1>Checkpoint</h1>
             </div>
         </div>
+
+        <br>
+
         <div class="row">
-            <br>
             <div class="col-lg-12">
-                <p>Checkpoint text goes here.</p>
+
+                <h3>Completed Work</h3>
+
+                <p>The majority of our time so far has been spent reading through <a href="http://www.broadcom.com/docs/support/videocore/VideoCoreIV-AG100-R.pdf">VideoCore IV 3D Architecture Reference</a> to gain a better understanding of the GPU architecture. We have also read through much of the relevant <a href="https://github.com/raspberrypi/userland">Raspberry Pi userland source code</a> and learned how to interface with the GPU through the <a href="https://github.com/raspberrypi/firmware/wiki/Mailbox-property-interface">mailbox property interface</a>. As a proof of concept, we have successfully used this interface to pull various diagnostic data from the GPU, including clock speed and temperature.  We feel that we have gained a sufficient understanding of these components and believe that our project, as outlined in our proposal, is feasible.</p>
+
+                <br>
+
+                <p>We have determined that we will need to use an assembler in order to translate QPU assembly instructions into object code that can be executed on the QPU. We have decided to use <a href="http://maazl.de/project/vc4asm/doc">vc4asm</a> as it seems to have the most features and best support among the QPU assemblers that we found. Writing the assembly code will not be difficult. We have a very good understanding of how to transfer memory between the GPU and the host using QPU assembly instructions.  Furthermore, our library will only consist of primitive vector operations such as add, multiply, etc. which map nicely to instructions in the QPU instruction set.</p>
+
+                <br>
+
+                <p>We have also looked at some existing code in order to simply get something to run successfully on the QPU.  At the moment we are simply trying to echo back a given input using the QPUs.  Specifically we are looking at <a href="https://github.com/elorimer/rpi-playground">rpi-playground</a> as well a samples code included with the vc4asm assembler.</p>
+            </div>
+        </div>
+
+        <br>
+
+        <div class="row">
+            <div class="col-lg-12">
+                <h3>Updated Project Schedule</h3>
+
+                <p>We are slightly behind our originally proposed schedule due to other commitments that have taken priority in the past couple of weeks. Our current project schedule is still the one outlined in our proposal. However we still feel that we are still on pace to deliver all deliverables as listed in our proposal. Writing the assembly code should not be challenging because we have a clear understanding how to transfer memory between to/from GPU and our library only consists of primitive vector operations which map extremely nicely to QPU instructions.</p>
+            </div>
+        </div>
+
+        <br>
+
+        <div class="row">
+            <div class="col-lg-12">
+                <h3>Deliverables and Parallelism Competition</h3>
+
+                <p>For the parallelism competition we will deliver a library interface that allows to users to process vectors of data using the QPUs. This library will support all standard primitive logical and mathematical operations such as add, multiply, and, or, etc. At the competition we plan to show a demo of a common parallel algorithm running on the QPU. We will also demo a comparison same algorithm being run using only the CPU, using the NEON SIMD on the CPU, and (possibly) using existing graphics libraries on the Raspberry Pi. We will also include graph of the performance that will have previously measured.</p>
+            </div>
+        </div>
+
+        <br>
+
+        <div class="row">
+            <div class="col-lg-12">
+                <h3>Issues and Concerns</h3>
+
+                <p>We are dealing with some difficult issues getting code to successfully run on the QPUs. Specifically we are experiencing hangs when interfacing with the GPU using the <a href"https://en.wikipedia.org/wiki/Ioctl">ioctl</a> system call within the mailbox interface. It appears that these issues are related to the handling of memory-mapped I/O, which is necessary to transfer data to/from the GPU. However we are confident this issues can be resolved quickly. This is likely the last significant issue we encounter and finishing the library will be relatively easy once it is resolved.</p>
             </div>
         </div>
     </div>
