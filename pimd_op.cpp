@@ -1,10 +1,7 @@
 #include "pimd.h"
 
-static unsigned op_sload[] = {
-    #include "hex/op_sload.hex"
-};
-static unsigned op_vload[] = {
-    #include "hex/op_vload.hex"
+static unsigned op_load[] = {
+    #include "hex/op_load.hex"
 };
 static unsigned op_store[] = {
     #include "hex/op_store.hex"
@@ -20,6 +17,9 @@ static unsigned op_min[] = {
 };
 static unsigned op_max[] = {
     #include "hex/op_max.hex"
+};
+static unsigned op_abs[] = {
+    #include "hex/op_abs.hex"
 };
 static unsigned op_and[] = {
     #include "hex/op_and.hex"
@@ -78,14 +78,38 @@ static unsigned op_mul24[] = {
 static unsigned op_mul[] = {
     #include "hex/op_mul.hex"
 };
-static unsigned op_div[] = {
-    #include "hex/op_div.hex"
-};
 static unsigned op_fmul[] = {
     #include "hex/op_mul.hex"
 };
-static unsigned op_fdiv[] = {
-    #include "hex/op_fdiv.hex"
+static unsigned op_exp[] = {
+    #include "hex/op_exp.hex"
+};
+static unsigned op_log[] = {
+    #include "hex/op_log.hex"
+};
+static unsigned op_recip[] = {
+    #include "hex/op_recip.hex"
+};
+static unsigned op_recipsqrt[] = {
+    #include "hex/op_recipsqrt.hex"
+};
+static unsigned op_sqrt[] = {
+    #include "hex/op_sqrt.hex"
+};
+static unsigned inst_start[] = {
+    #include "hex/inst_start.hex"
+};
+static unsigned inst_end[] = {
+    #include "hex/inst_end.hex"
+};
+static unsigned inst_unif[] = {
+    #include "hex/inst_unif.hex"
+};
+static unsigned inst_tmu[] = {
+    #include "hex/inst_tmu.hex"
+};
+static unsigned inst_ldtmu[] = {
+    #include "hex/inst_ldtmu.hex"
 };
 
 static struct {
@@ -94,13 +118,13 @@ static struct {
     unsigned *code;
 }
 pimd_ops[] = {
-    {1, sizeof(op_sload), op_sload},
-    {1, sizeof(op_vload), op_vload},
+    {1, sizeof(op_load), op_load},
     {1, sizeof(op_store), op_store},
     {1, sizeof(op_add), op_add},
     {1, sizeof(op_sub), op_sub},
     {1, sizeof(op_min), op_min},
     {1, sizeof(op_max), op_max},
+    {1, sizeof(op_abs), op_abs},
     {1, sizeof(op_and), op_and},
     {1, sizeof(op_or), op_or},
     {1, sizeof(op_xor), op_xor},
@@ -120,9 +144,17 @@ pimd_ops[] = {
     {0, sizeof(op_ftoi), op_ftoi},
     {1, sizeof(op_mul24), op_mul24},
     {1, sizeof(op_mul), op_mul},
-    {1, sizeof(op_div), op_div},
     {1, sizeof(op_fmul), op_fmul},
-    {1, sizeof(op_fdiv), op_fdiv},
+    {0, sizeof(op_exp), op_exp},
+    {0, sizeof(op_log), op_log},
+    {0, sizeof(op_recip), op_recip},
+    {0, sizeof(op_recipsqrt), op_recipsqrt},
+    {0, sizeof(op_sqrt), op_sqrt},
+    {0, sizeof(inst_start), inst_start},
+    {0, sizeof(inst_end), inst_end},
+    {0, sizeof(inst_unif), inst_unif},
+    {0, sizeof(inst_tmu), inst_tmu},
+    {0, sizeof(inst_ldtmu), inst_ldtmu},
 };
 
 int pimd_op_num_args(PimdOp op) {

@@ -1,6 +1,7 @@
 OBJECT_DIR = obj
 QASM_DIR = qasm
 HEX_DIR = hex
+HELPERS_DIR = .
 MAILBOX_DIR = /opt/vc/src/hello_pi/hello_fft
 INSTALL_PATH = /usr/local
 
@@ -12,11 +13,16 @@ QASM = $(wildcard $(QASM_DIR)/*.qasm)
 HEX = $(patsubst $(QASM_DIR)/%.qasm,$(HEX_DIR)/%.hex,$(QASM))
 
 AS = vc4asm
-ASFLAGS = -I..
+ASFLAGS = -I $(HELPERS_DIR)/
 CXX = g++
-CXXFLAGS = -O3 -Wall -Wextra
+CXXFLAGS += -std=c++11 -O3 -Wall -Wextra -I $(MAILBOX_DIR)
 INSTALL = install
 RM = rm -f
+
+ARCH = $(shell getconf LONG_BIT)
+ifneq ($(ARCH),32)
+	CXXFLAGS += -m32
+endif
 
 .PHONY: all install uninstall clean
 
@@ -26,7 +32,6 @@ install:
 	$(INSTALL) -d -m 755 $(INSTALL_PATH)/lib
 	$(INSTALL) -m 755 $(TARGET) $(INSTALL_PATH)/lib
 	$(INSTALL) -d -m 755 $(INSTALL_PATH)/include
-	$(INSTALL) -m 755 $(MAILBOX_DIR)/mailbox.h $(INSTALL_PATH)/include
 	$(INSTALL) -m 755 $(HEADERS) $(INSTALL_PATH)/include
 
 uninstall:
