@@ -162,7 +162,7 @@ int pimd_op_num_args(PimdOp op) {
 }
 
 unsigned pimd_op_size(PimdOp op) {
-    return pimd_ops[op].size;
+    return pimd_ops[op].size / sizeof(unsigned);
 }
 
 unsigned *pimd_op_code(PimdOp op) {

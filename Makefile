@@ -19,11 +19,6 @@ CXXFLAGS += -std=c++11 -O3 -Wall -Wextra -I $(MAILBOX_DIR)
 INSTALL = install
 RM = rm -f
 
-ARCH = $(shell getconf LONG_BIT)
-ifneq ($(ARCH),32)
-	CXXFLAGS += -m32
-endif
-
 .PHONY: all install uninstall clean
 
 all: $(HEX_DIR) $(OBJECT_DIR) $(HEX) $(TARGET)
@@ -54,8 +49,7 @@ $(HEX_DIR):
 	$(INSTALL) -d $(HEX_DIR)/
 
 $(OBJECT_DIR):
-	mkdir -p $(OBJECT_DIR)/
+	$(INSTALL) -d $(OBJECT_DIR)/
 
 clean:
 	$(RM) -r $(HEX_DIR)/ $(OBJECT_DIR)/
-

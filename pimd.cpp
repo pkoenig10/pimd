@@ -7,8 +7,7 @@
 
 #define BUS_TO_PHYS(addr) ((addr) & ~0xC0000000)
 
-#define GPU_MEM_FLG 0xC
-#define GPU_MEM_MAP 0x0
+#define GPU_MEM_FLG 0xC // cached=0xC; direct=0x4
 
 #define GPU_QPUS 8
 #define GPU_LEN 1024
@@ -25,28 +24,34 @@ private:
     PimdArg *args;
     int num_args;
 
-    int next_arg;
-    int next_tmu_arg;
+    int next_arg = 0;
+    int next_tmu_arg = 0;
 
 public:
     std::vector<unsigned> qpu_code;
     std::vector<PimdArg> qpu_args;
-    int num_inputs;
-    int num_outputs;
+    int num_inputs = 0;
+    int num_outputs = 0;
 
     PimdInfo(PimdOp *ops, int num_ops, PimdArg *args, int num_args) :
-    ops(ops), num_ops(num_ops), args(args), num_args(num_args), next_arg(0), next_tmu_arg(0) {
+    ops(ops), num_ops(num_ops), args(args), num_args(num_args) {
+        for (int i=0; i<num_ops; i++) {
+            if (pimd_op_num_args(ops[i])) {
+                if (ops[i] == OP_STORE) {
+                    args[next_arg].type = PimdArg::ADDR;
+                }
+                next_arg++;
+            }
+        }
+        next_arg = 0;
+
+        code_append(INST_START);
+
         for (int i=0; i<4; i++) {
             tmu_fetch();
         }
 
-        code_append(INST_START);
-
         for (int i=0; i<num_ops; i++) {
-            if (ops[i] == OP_STORE) {
-                args[next_arg].type = PimdArg::ADDR;
-            }
-
             if (pimd_op_num_args(ops[i])) {
                 load_arg(args[next_arg++]);
             }
@@ -63,7 +68,7 @@ public:
 
     void tmu_fetch() {
         for(; next_tmu_arg < num_args; next_tmu_arg++) {
-            if (args[next_arg].type == PimdArg::VECTOR) {
+            if (args[next_tmu_arg].type == PimdArg::VECTOR) {
                 code_append(INST_TMU);
                 qpu_args.push_back(args[next_tmu_arg++]);
                 break;
@@ -78,8 +83,6 @@ public:
 
     void load_arg(PimdArg arg) {
         switch(arg.type) {
-        case PimdArg::PimdArg::ADDR:
-            num_outputs++;
         case PimdArg::SCALAR:
             code_append(INST_UNIF);
             qpu_args.push_back(arg);
@@ -88,6 +91,11 @@ public:
         case PimdArg::PimdArg::VECTOR:
             num_inputs++;
             tmu_recv();
+            break;
+
+        case PimdArg::PimdArg::ADDR:
+            num_outputs++;
+            qpu_args.push_back(arg);
             break;
         }
     }
@@ -134,13 +142,13 @@ int pimd_execute(int mb, PimdOp *ops, int num_ops, PimdArg *args, int num_args, 
     unsigned uniforms_size = info.qpu_args.size();
     unsigned messages_size = 2 * GPU_QPUS;
 
-    unsigned mem_size = (code_size + inputs_size + outputs_size + uniforms_size + messages_size + outputs_size) * sizeof(unsigned);
+    unsigned mem_size = (code_size + inputs_size + outputs_size + uniforms_size + messages_size) * sizeof(unsigned);
     unsigned handle = mem_alloc(mb, mem_size, 4096, GPU_MEM_FLG);
     if (!handle) {
         return -3;
     }
     unsigned *gpu_ptr = (unsigned*)mem_lock(mb, handle);
-    unsigned *arm_ptr = (unsigned*)mapmem(BUS_TO_PHYS((unsigned)gpu_ptr+GPU_MEM_MAP), mem_size);
+    unsigned *arm_ptr = (unsigned*)mapmem(BUS_TO_PHYS((unsigned)gpu_ptr), mem_size);
 
     unsigned *p = arm_ptr;
 
@@ -183,6 +191,9 @@ int pimd_execute(int mb, PimdOp *ops, int num_ops, PimdArg *args, int num_args, 
     }
 
     if (execute_qpu(mb, GPU_QPUS, gpu_addr(arm_ptr, gpu_ptr, messages), 1, timeout)) {
+        unmapmem(arm_ptr, mem_size);
+        mem_unlock(mb, handle);
+        mem_free(mb, handle);
         return -4;
     }
 
@@ -193,6 +204,10 @@ int pimd_execute(int mb, PimdOp *ops, int num_ops, PimdArg *args, int num_args, 
             return_output += GPU_LEN;
         }
     }
+
+    unmapmem(arm_ptr, mem_size);
+    mem_unlock(mb, handle);
+    mem_free(mb, handle);
 
     return 0;
 }
