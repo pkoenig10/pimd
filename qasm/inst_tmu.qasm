@@ -1,3 +1,9 @@
-mov r2, unif
-add t0s, r2, rb0
-add t1s, r2, rb1
+add r0, unif, ra18
+add t0s, r0, ra10
+add t0s, r0, ra11
+add t0s, r0, ra12
+add t0s, r0, ra13
+add t1s, r0, ra14
+add t1s, r0, ra15
+add t1s, r0, ra16
+add t1s, r0, ra17

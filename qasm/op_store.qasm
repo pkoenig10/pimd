@@ -5,17 +5,23 @@
 .global end
 
 mov.setf -, qpu_num
-mov r2, VPM_WRITE_SETUP_VALUE(1, IS_HORIZ, NOT_LANED, SIZE_32_BIT, 0)
+mov r0, VPM_WRITE_SETUP_VALUE(1, IS_HORIZ, NOT_LANED, SIZE_32_BIT, 0)
+or vw_setup, r0, ra19
+mov vpm, ra0
+mov vpm, ra1
+mov vpm, ra2
+mov vpm, ra3
+mov vpm, ra4
 brr.allz -, r:master
-or vw_setup, r2, rb2
-mov vpm, r0
-mov vpm, r1
+mov vpm, ra5
+mov vpm, ra6
+mov vpm, ra7
 
 slave:
 	brr -, r:end
 	srel -, 0		# Signal to master
 	sacq -, 1		# Wait for master
-	nop
+	read unif		# Discard store address
 
 master:
 	# Wait for slaves
