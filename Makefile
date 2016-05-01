@@ -1,6 +1,7 @@
 OBJECT_DIR = obj
 QASM_DIR = qasm
 HEX_DIR = hex
+HELPERS_DIR = .
 MAILBOX_DIR = /opt/vc/src/hello_pi/hello_fft
 INSTALL_PATH = /usr/local
 
@@ -12,9 +13,9 @@ QASM = $(wildcard $(QASM_DIR)/*.qasm)
 HEX = $(patsubst $(QASM_DIR)/%.qasm,$(HEX_DIR)/%.hex,$(QASM))
 
 AS = vc4asm
-ASFLAGS = -I..
+ASFLAGS = -I $(HELPERS_DIR)/
 CXX = g++
-CXXFLAGS = -O3 -Wall -Wextra
+CXXFLAGS += -std=c++11 -O3 -Wall -Wextra -I $(MAILBOX_DIR)
 INSTALL = install
 RM = rm -f
 
@@ -26,7 +27,6 @@ install:
 	$(INSTALL) -d -m 755 $(INSTALL_PATH)/lib
 	$(INSTALL) -m 755 $(TARGET) $(INSTALL_PATH)/lib
 	$(INSTALL) -d -m 755 $(INSTALL_PATH)/include
-	$(INSTALL) -m 755 $(MAILBOX_DIR)/mailbox.h $(INSTALL_PATH)/include
 	$(INSTALL) -m 755 $(HEADERS) $(INSTALL_PATH)/include
 
 uninstall:
@@ -36,7 +36,7 @@ uninstall:
 $(TARGET): $(OBJECTS) $(OBJECT_DIR)/mailbox.o
 	$(CXX) $(CXXFLAGS) --shared $^ -o $@
 
-$(OBJECT_DIR)/%.o: %.cpp
+$(OBJECT_DIR)/%.o: %.cpp $(HEX)
 	$(CXX) $(CXXFLAGS) -c -fPIC $< -o $@
 
 $(OBJECT_DIR)/mailbox.o: $(MAILBOX_DIR)/mailbox.c
@@ -49,8 +49,7 @@ $(HEX_DIR):
 	$(INSTALL) -d $(HEX_DIR)/
 
 $(OBJECT_DIR):
-	mkdir -p $(OBJECT_DIR)/
+	$(INSTALL) -d $(OBJECT_DIR)/
 
 clean:
 	$(RM) -r $(HEX_DIR)/ $(OBJECT_DIR)/
-
