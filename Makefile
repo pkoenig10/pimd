@@ -36,7 +36,7 @@ uninstall:
 $(TARGET): $(OBJECTS) $(OBJECT_DIR)/mailbox.o
 	$(CXX) $(CXXFLAGS) --shared $^ -o $@
 
-$(OBJECT_DIR)/%.o: %.cpp
+$(OBJECT_DIR)/%.o: %.cpp $(HEX)
 	$(CXX) $(CXXFLAGS) -c -fPIC $< -o $@
 
 $(OBJECT_DIR)/mailbox.o: $(MAILBOX_DIR)/mailbox.c

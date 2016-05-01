@@ -1,4 +1,5 @@
 #include "pimd.h"
+#include "pimd_op.h"
 
 static unsigned op_load[] = {
     #include "hex/op_load.hex"
@@ -113,52 +114,75 @@ static unsigned inst_ldtmu[] = {
 };
 
 static struct {
-    int num_args;
+    PimdOpType type;
     unsigned size;
     unsigned *code;
 }
 pimd_ops[] = {
-    {1, sizeof(op_load), op_load},
-    {1, sizeof(op_store), op_store},
-    {1, sizeof(op_add), op_add},
-    {1, sizeof(op_sub), op_sub},
-    {1, sizeof(op_min), op_min},
-    {1, sizeof(op_max), op_max},
-    {1, sizeof(op_abs), op_abs},
-    {1, sizeof(op_and), op_and},
-    {1, sizeof(op_or), op_or},
-    {1, sizeof(op_xor), op_xor},
-    {1, sizeof(op_shl), op_shl},
-    {1, sizeof(op_shr), op_shr},
-    {1, sizeof(op_asr), op_asr},
-    {1, sizeof(op_ror), op_ror},
-    {1, sizeof(op_fadd), op_fadd},
-    {1, sizeof(op_fsub), op_fsub},
-    {1, sizeof(op_fmin), op_fmin},
-    {1, sizeof(op_fmax), op_fmax},
-    {1, sizeof(op_fminabs), op_fminabs},
-    {1, sizeof(op_fmaxabs), op_fmaxabs},
-    {0, sizeof(op_not), op_not},
-    {0, sizeof(op_clz), op_clz},
-    {0, sizeof(op_itof), op_itof},
-    {0, sizeof(op_ftoi), op_ftoi},
-    {1, sizeof(op_mul24), op_mul24},
-    {1, sizeof(op_mul), op_mul},
-    {1, sizeof(op_fmul), op_fmul},
-    {0, sizeof(op_exp), op_exp},
-    {0, sizeof(op_log), op_log},
-    {0, sizeof(op_recip), op_recip},
-    {0, sizeof(op_recipsqrt), op_recipsqrt},
-    {0, sizeof(op_sqrt), op_sqrt},
-    {0, sizeof(inst_start), inst_start},
-    {0, sizeof(inst_end), inst_end},
-    {0, sizeof(inst_unif), inst_unif},
-    {0, sizeof(inst_tmu), inst_tmu},
-    {0, sizeof(inst_ldtmu), inst_ldtmu},
+    {SCALAR, sizeof(op_load),       op_load},
+    {VECTOR, sizeof(op_load),       op_load},
+    {ADDR,   sizeof(op_store),      op_store},
+    {SCALAR, sizeof(op_add),        op_add},
+    {SCALAR, sizeof(op_sub),        op_sub},
+    {SCALAR, sizeof(op_min),        op_min},
+    {SCALAR, sizeof(op_max),        op_max},
+    {SCALAR, sizeof(op_abs),        op_abs},
+    {SCALAR, sizeof(op_and),        op_and},
+    {SCALAR, sizeof(op_or),         op_or},
+    {SCALAR, sizeof(op_xor),        op_xor},
+    {SCALAR, sizeof(op_shl),        op_shl},
+    {SCALAR, sizeof(op_shr),        op_shr},
+    {SCALAR, sizeof(op_asr),        op_asr},
+    {SCALAR, sizeof(op_ror),        op_ror},
+    {SCALAR, sizeof(op_mul24),      op_mul24},
+    {SCALAR, sizeof(op_mul),        op_mul},
+    {SCALAR, sizeof(op_fadd),       op_fadd},
+    {SCALAR, sizeof(op_fsub),       op_fsub},
+    {SCALAR, sizeof(op_fmin),       op_fmin},
+    {SCALAR, sizeof(op_fmax),       op_fmax},
+    {SCALAR, sizeof(op_fminabs),    op_fminabs},
+    {SCALAR, sizeof(op_fmaxabs),    op_fmaxabs},
+    {SCALAR, sizeof(op_fmul),       op_fmul},
+    {VECTOR, sizeof(op_add),        op_add},
+    {VECTOR, sizeof(op_sub),        op_sub},
+    {VECTOR, sizeof(op_min),        op_min},
+    {VECTOR, sizeof(op_max),        op_max},
+    {VECTOR, sizeof(op_abs),        op_abs},
+    {VECTOR, sizeof(op_and),        op_and},
+    {VECTOR, sizeof(op_or),         op_or},
+    {VECTOR, sizeof(op_xor),        op_xor},
+    {VECTOR, sizeof(op_shl),        op_shl},
+    {VECTOR, sizeof(op_shr),        op_shr},
+    {VECTOR, sizeof(op_asr),        op_asr},
+    {VECTOR, sizeof(op_ror),        op_ror},
+    {VECTOR, sizeof(op_mul24),      op_mul24},
+    {VECTOR, sizeof(op_mul),        op_mul},
+    {VECTOR, sizeof(op_fadd),       op_fadd},
+    {VECTOR, sizeof(op_fsub),       op_fsub},
+    {VECTOR, sizeof(op_fmin),       op_fmin},
+    {VECTOR, sizeof(op_fmax),       op_fmax},
+    {VECTOR, sizeof(op_fminabs),    op_fminabs},
+    {VECTOR, sizeof(op_fmaxabs),    op_fmaxabs},
+    {VECTOR, sizeof(op_fmul),       op_fmul},
+    {NONE,   sizeof(op_not),        op_not},
+    {NONE,   sizeof(op_clz),        op_clz},
+    {NONE,   sizeof(op_itof),       op_itof},
+    {NONE,   sizeof(op_ftoi),       op_ftoi},
+    {NONE,   sizeof(op_exp),        op_exp},
+    {NONE,   sizeof(op_log),        op_log},
+    {NONE,   sizeof(op_recip),      op_recip},
+    {NONE,   sizeof(op_recipsqrt),  op_recipsqrt},
+    {NONE,   sizeof(op_sqrt),       op_sqrt},
+    {NONE,   sizeof(inst_start),    inst_start},
+    {NONE,   sizeof(inst_end),      inst_end},
+    {NONE,   sizeof(inst_unif),     inst_unif},
+    {NONE,   sizeof(inst_tmu),      inst_tmu},
+    {NONE,   sizeof(inst_ldtmu),    inst_ldtmu},
 };
 
-int pimd_op_num_args(PimdOp op) {
-    return pimd_ops[op].num_args;
+
+PimdOpType pimd_op_type(PimdOp op) {
+    return pimd_ops[op].type;
 }
 
 unsigned pimd_op_size(PimdOp op) {
