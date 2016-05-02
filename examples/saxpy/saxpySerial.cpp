@@ -1,4 +1,4 @@
-#include "saxpySerial.hpp";
+#include "saxpySerial.hpp"
 
 void saxpySerial(int N,
                        float scale,

@@ -14,7 +14,7 @@ void saxpy_NEON(int N,
         Yvec = vld1q_f32((Y+i));
         Xvec = vmulq_f32(Xvec,scaleVec);
         resultVec = vaddq_f32(Xvec,Yvec);  
-        vld1q_f32(result+i, resultVec); 
+        vst1q_f32(result+i, resultVec); 
     }
 }
 
