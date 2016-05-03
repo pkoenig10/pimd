@@ -10,5 +10,8 @@ add ra16, ra14, r0 		# ra16 = (0x0180, 0x0184, ... , 0x01bc) = TMU1 (6) fetch of
 add ra17, ra15, r0 		# ra17 = (0x01c0, 0x01c4, ... , 0x01fc) = TMU1 (7) fetch offsets
 
 mov r0, qpu_num
+brr ra20, -				# ra20 = Loop begin address
 shl ra18, r0, 9			# ra18 = 0x0000 / 0x0200 / ... / 0x0e00 = QPU TMU fetch offsets
-shl ra19, r0, 3			# ra19 = 0x00 / 0x02 / ... / 0x0c = QPU VPM write offsets
+shl ra19, r0, 3			# ra19 = 0x0000 / 0x0002 / ... / 0x000e = QPU VPM write offsets
+
+mov ra21, unif		    # ra21 = Loop counter

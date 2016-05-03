@@ -23,15 +23,18 @@ struct PimdArgInfo {
 
 int pimd_open() {
     int mb = mbox_open();
+
     if (qpu_enable(mb, 1)) {
         mbox_close(mb);
         return 0;
     }
+
     return mb;
 }
 
 void pimd_close(int mb) {
     qpu_enable(mb, 0);
+
     mbox_close(mb);
 }
 
@@ -45,9 +48,7 @@ public:
     int num_outputs = 0;
 
     unsigned handle = 0;
-    unsigned mem_size;
-    unsigned *gpu_ptr;
-    unsigned *arm_ptr;
+    int mem_len;
     unsigned *code_ptr;
     unsigned *inputs_ptr;
     unsigned *outputs_ptr;
@@ -117,6 +118,64 @@ public:
         code_append(INST_END);
     }
 
+    int alloc(int len) {
+        if (handle) {
+            return 0;
+        }
+
+        mem_len = (len + GPU_LEN - 1) & ~(GPU_LEN - 1);
+
+        unsigned code_size = code.size();
+        unsigned inputs_size = num_inputs * mem_len;
+        unsigned outputs_size = num_outputs * mem_len;
+        unsigned uniforms_size = args.size() * mem_len / GPU_LEN + 1;
+        unsigned messages_size = 2 * GPU_QPUS;
+
+        mem_size = (code_size + inputs_size + outputs_size + uniforms_size + messages_size) * sizeof(unsigned);
+        handle = mem_alloc(mb, mem_size, 4096, GPU_MEM_FLG);
+        if (!handle) {
+            return -1;
+        }
+        len = len;
+        gpu_ptr = (unsigned*)mem_lock(mb, handle);
+        arm_ptr = (unsigned*)mapmem(BUS_TO_PHYS((unsigned)gpu_ptr), mem_size);
+
+        unsigned *p = arm_ptr;
+
+        code_ptr = p;
+        std::copy(code.begin(), code.end(), code_ptr);
+        p += code_size;
+
+        inputs_ptr = p;
+        p += inputs_size;
+
+        outputs_ptr = p;
+        p += outputs_size;
+
+        uniforms_ptr = p;
+        p += uniforms_size;
+
+        messages_ptr = p;
+        for (int i=0; i<GPU_QPUS; ++i) {
+            *p++ = gpu_addr(uniforms_ptr);
+            *p++ = gpu_addr(code_ptr);
+        }
+
+        return 0;
+    }
+
+    void free() {
+        if (!handle) {
+            return;
+        }
+
+        unmapmem(arm_ptr, mem_size);
+        mem_unlock(mb, handle);
+        mem_free(mb, handle);
+
+        handle = 0;
+    }
+
     unsigned gpu_addr(unsigned *p) {
         return (unsigned)(gpu_ptr + (p - arm_ptr));
     }
@@ -124,6 +183,10 @@ public:
 private:
     PimdOp *ops;
     int num_ops;
+
+    unsigned mem_size;
+    unsigned *gpu_ptr;
+    unsigned *arm_ptr;
 
     void code_append(PimdOp op) {
         code.insert(code.end(), pimd_op_code(op), pimd_op_code(op) + pimd_op_size(op));
@@ -145,33 +208,44 @@ int PimdFunction::call(PimdArg *args, int num_args, int len, int timeout) {
         return -1;
     }
 
-    if (!info->handle && alloc()) {
+    if (info->handle && len > info->mem_len) {
+        free();
+    }
+
+    if (!info->handle && info->alloc(len)) {
         return -2;
     }
 
+    int num_loop = (len + GPU_LEN - 1) / GPU_LEN;
+
     unsigned *p = info->uniforms_ptr;
-    unsigned *uniforms_input = info->inputs_ptr;
-    unsigned *uniforms_output = info->outputs_ptr;
-    for(auto const& arg_info: info->args) {
-        PimdArg arg = args[arg_info.index];
-        switch(arg_info.type) {
-        case SCALAR:
-            *p++ = arg.u;
-            break;
+    *p++ = num_loop;
+    for (int i=0; i<num_loop; i++) {
+        unsigned *uniforms_input = info->inputs_ptr;
+        unsigned *uniforms_output = info->outputs_ptr;
+        for(auto const& arg_info: info->args) {
+            PimdArg arg = args[arg_info.index];
+            switch(arg_info.type) {
+            case SCALAR:
+                *p++ = arg.u;
+                break;
 
-        case VECTOR:
-            std::memcpy(uniforms_input, arg.p, len * sizeof(unsigned));
-            *p++ = info->gpu_addr(uniforms_input);
-            uniforms_input += GPU_LEN;
-            break;
+            case VECTOR:
+                if (i == 0) {
+                    std::memcpy(uniforms_input, arg.p, len * sizeof(unsigned));
+                }
+                *p++ = info->gpu_addr(uniforms_input);
+                uniforms_input += GPU_LEN;
+                break;
 
-        case ADDR:
-            *p++ = info->gpu_addr(uniforms_output);
-            uniforms_output += GPU_LEN;
-            break;
+            case ADDR:
+                *p++ = info->gpu_addr(uniforms_output);
+                uniforms_output += GPU_LEN;
+                break;
 
-        default:
-            break;
+            default:
+                break;
+            }
         }
     }
 
@@ -191,55 +265,6 @@ int PimdFunction::call(PimdArg *args, int num_args, int len, int timeout) {
     return 0;
 }
 
-int PimdFunction::alloc() {
-    if (info->handle) {
-        return 0;
-    }
-
-    unsigned code_size = info->code.size();
-    unsigned inputs_size = info->num_inputs * GPU_LEN;
-    unsigned outputs_size = info->num_outputs * GPU_LEN;
-    unsigned uniforms_size = info->args.size();
-    unsigned messages_size = 2 * GPU_QPUS;
-
-    info->mem_size = (code_size + inputs_size + outputs_size + uniforms_size + messages_size) * sizeof(unsigned);
-    info->handle = mem_alloc(info->mb, info->mem_size, 4096, GPU_MEM_FLG);
-    if (!info->handle) {
-        return -1;
-    }
-    info->gpu_ptr = (unsigned*)mem_lock(info->mb, info->handle);
-    info->arm_ptr = (unsigned*)mapmem(BUS_TO_PHYS((unsigned)info->gpu_ptr), info->mem_size);
-
-    unsigned *p = info->arm_ptr;
-
-    info->code_ptr = p;
-    std::copy(info->code.begin(), info->code.end(), info->code_ptr);
-    p += code_size;
-
-    info->inputs_ptr = p;
-    p += inputs_size;
-
-    info->outputs_ptr = p;
-    p += outputs_size;
-
-    info->uniforms_ptr = p;
-    p += uniforms_size;
-
-    info->messages_ptr = p;
-    for (int i=0; i<GPU_QPUS; ++i) {
-        *p++ = info->gpu_addr(info->uniforms_ptr);
-        *p++ = info->gpu_addr(info->code_ptr);
-    }
-
-    return 0;
-}
-
 void PimdFunction::free() {
-    if (!info->handle) {
-        return;
-    }
-    unmapmem(info->arm_ptr, info->mem_size);
-    mem_unlock(info->mb, info->handle);
-    mem_free(info->mb, info->handle);
-    info->handle = 0;
+    info->free();
 }

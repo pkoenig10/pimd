@@ -110,8 +110,8 @@
 # ~~~~~~~~~~~~~~~~~~~
 # Kicks off the transfer of data from the local VPM data cache to main memory.
 # It will use the settings from VPM_STORE_SETUP to control the copy process.
-.macro VPM_STORE_START, ADDR
-  mov vw_addr, ADDR
+.macro VPM_STORE_START, ADDR, OFFSET
+  add vw_addr, ADDR, OFFSET
 .endm
 
 # VPM_STORE_WAIT
@@ -153,8 +153,8 @@
 # ~~~~~~~~~~~~~~~~~~~
 # Kicks off the transfer of data from main memory to the local VPM data cache.
 # It will use the settings from VPM_LOAD_SETUP to control the copy process.
-.macro VPM_LOAD_START, ADDR
-  mov vr_addr, ADDR
+.macro VPM_LOAD_START, ADDR, OFFSET
+  add vr_addr, ADDR, OFFSET
 .endm
 
 # VPM_LOAD_WAIT
