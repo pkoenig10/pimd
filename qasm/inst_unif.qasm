@@ -1,9 +1,11 @@
+.include "pimd.qinc"
+
 mov r0, unif
-mov rb0, r0
-mov rb1, r0
-mov rb2, r0
-mov rb3, r0
-mov rb4, r0
-mov rb5, r0
-mov rb6, r0
-mov rb7, r0
+mov arg0, r0
+mov arg1, r0
+mov arg2, r0
+mov arg3, r0
+mov arg4, r0
+mov arg5, r0
+mov arg6, r0
+mov arg7, r0

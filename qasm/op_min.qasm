@@ -1,8 +1,10 @@
-min ra0, ra0, rb0
-min ra1, ra1, rb1
-min ra2, ra2, rb2
-min ra3, ra3, rb3
-min ra4, ra4, rb4
-min ra5, ra5, rb5
-min ra6, ra6, rb6
-min ra7, ra7, rb7
+.include "pimd.qinc"
+
+min var0, var0, arg0
+min var1, var1, arg1
+min var2, var2, arg2
+min var3, var3, arg3
+min var4, var4, arg4
+min var5, var5, arg5
+min var6, var6, arg6
+min var7, var7, arg7

@@ -1,8 +1,10 @@
-fadd ra0, ra0, rb0
-fadd ra1, ra1, rb1
-fadd ra2, ra2, rb2
-fadd ra3, ra3, rb3
-fadd ra4, ra4, rb4
-fadd ra5, ra5, rb5
-fadd ra6, ra6, rb6
-fadd ra7, ra7, rb7
+.include "pimd.qinc"
+
+fadd var0, var0, arg0
+fadd var1, var1, arg1
+fadd var2, var2, arg2
+fadd var3, var3, arg3
+fadd var4, var4, arg4
+fadd var5, var5, arg5
+fadd var6, var6, arg6
+fadd var7, var7, arg7

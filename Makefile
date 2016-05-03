@@ -10,10 +10,11 @@ SOURCES = pimd.cpp pimd_op.cpp
 HEADERS = pimd.h 
 OBJECTS = $(addprefix $(OBJECT_DIR)/,$(SOURCES:.cpp=.o))
 QASM = $(wildcard $(QASM_DIR)/*.qasm)
+QINC = $(wildcard $(QASM_DIR)/*.qinc)
 HEX = $(patsubst $(QASM_DIR)/%.qasm,$(HEX_DIR)/%.hex,$(QASM))
 
 AS = vc4asm
-ASFLAGS = -I $(HELPERS_DIR)/
+ASFLAGS = -V
 CXX = g++
 CXXFLAGS += -std=c++11 -O3 -Wall -Wextra -I $(MAILBOX_DIR)
 INSTALL = install
@@ -21,7 +22,9 @@ RM = rm -f
 
 .PHONY: all install uninstall clean
 
-all: $(HEX_DIR) $(OBJECT_DIR) $(HEX) $(TARGET)
+.PRECIOUS: $(HEX_DIR)/%.hex
+
+all: $(HEX_DIR) $(OBJECT_DIR) $(TARGET)
 
 install:
 	$(INSTALL) -d -m 755 $(INSTALL_PATH)/lib
@@ -42,7 +45,7 @@ $(OBJECT_DIR)/%.o: %.cpp $(HEX)
 $(OBJECT_DIR)/mailbox.o: $(MAILBOX_DIR)/mailbox.c
 	$(CXX) $(CXXFLAGS) -c -fPIC $< -o $@
 
-$(HEX_DIR)/%.hex: $(QASM_DIR)/%.qasm
+$(HEX_DIR)/%.hex: $(QASM_DIR)/%.qasm $(QINC)
 	$(AS) $(ASFLAGS) -C $@ $<
 
 $(HEX_DIR):

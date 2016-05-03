@@ -1,9 +1,3 @@
-add r0, unif, ra18
-add t0s, r0, ra10
-add t0s, r0, ra11
-add t0s, r0, ra12
-add t0s, r0, ra13
-add t1s, r0, ra14
-add t1s, r0, ra15
-add t1s, r0, ra16
-add t1s, r0, ra17
+.include "pimd.qinc"
+
+tmu_fetch unif
