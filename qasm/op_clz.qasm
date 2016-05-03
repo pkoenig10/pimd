@@ -1,8 +1,10 @@
-clz ra0, ra0
-clz ra1, ra1
-clz ra2, ra2
-clz ra3, ra3
-clz ra4, ra4
-clz ra5, ra5
-clz ra6, ra6
-clz ra7, ra7
+.include "pimd.qinc"
+
+clz var0, var0
+clz var1, var1
+clz var2, var2
+clz var3, var3
+clz var4, var4
+clz var5, var5
+clz var6, var6
+clz var7, var7

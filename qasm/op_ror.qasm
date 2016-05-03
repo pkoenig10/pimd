@@ -1,8 +1,10 @@
-ror ra0, ra0, rb0
-ror ra1, ra1, rb1
-ror ra2, ra2, rb2
-ror ra3, ra3, rb3
-ror ra4, ra4, rb4
-ror ra5, ra5, rb5
-ror ra6, ra6, rb6
-ror ra7, ra7, rb7
+.include "pimd.qinc"
+
+ror var0, var0, arg0
+ror var1, var1, arg1
+ror var2, var2, arg2
+ror var3, var3, arg3
+ror var4, var4, arg4
+ror var5, var5, arg5
+ror var6, var6, arg6
+ror var7, var7, arg7

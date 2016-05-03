@@ -1,0 +1,158 @@
+.set var0,           ra0           
+.set var1,           ra1
+.set var2,           ra2
+.set var3,           ra3
+.set var4,           ra4
+.set var5,           ra5
+.set var6,           ra6
+.set var7,           ra7
+
+.set arg0,           rb0
+.set arg1,           rb1
+.set arg2,           rb2
+.set arg3,           rb3
+.set arg4,           rb4
+.set arg5,           rb5
+.set arg6,           rb6
+.set arg7,           rb7
+
+.set loop,          ra24
+.set loop_count,    ra25
+.set vpm_value,     ra26
+.set vdw_value,     ra27
+.set vdw_offset,    ra28
+
+.set tmu_offset0,   rb24 
+.set tmu_offset1,   rb25
+.set tmu_offset2,   rb26
+.set tmu_offset3,   rb27
+.set tmu_offset4,   rb28
+.set tmu_offset5,   rb29
+.set tmu_offset6,   rb30
+.set tmu_offset7,   rb31
+
+.set sem_master,       0
+.set sem_slave,        1
+
+
+.func vpm_setup(num, stride, dma)
+  .assert !((num-1) & ~0xf)
+  .assert !((abs(stride)-1) & ~0x3f)
+  .assert !(dma & ~0xfff)
+  (num & 0xf) << 20 | (stride & 0x3f) << 12 | dma
+.endf
+
+.func h32(y, x)
+  .assert !(y & ~0x3f)
+  .assert !x
+  0xa00 | y
+.endf
+
+.func vdw_setup(units, depth, dma)
+  .assert !((units-1) & ~0x7f)
+  .assert !((depth-1) & ~0x7f)
+  .assert !(dma & ~0x7fff)
+  0x80000000 | (units & 0x7f) << 23 | (depth & 0x7f) << 16 | (dma & 0xffff)
+.endf
+
+.func dma_h32(y, x)
+  .assert !(y & ~0x7f)
+  .assert !(x & ~0xf)
+  0x4000 | y << 7 | x << 3
+.endf
+
+
+.macro tmu_setup
+  shl tmu_offset0, elem_num, 2        # (0x0000, 0x0004, ... , 0x003c)
+  mov r0, 64
+  add tmu_offset1, tmu_offset0, r0    # (0x0040, 0x0044, ... , 0x007c)
+  mov r0, 128
+  add tmu_offset2, tmu_offset0, r0    # (0x0080, 0x0084, ... , 0x00bc)
+  add tmu_offset3, tmu_offset1, r0    # (0x00c0, 0x00c4, ... , 0x00fc)
+  add tmu_offset4, tmu_offset2, r0    # (0x0100, 0x0104, ... , 0x013c)
+  add tmu_offset5, tmu_offset3, r0    # (0x0140, 0x0144, ... , 0x017c)
+  add tmu_offset6, tmu_offset4, r0    # (0x0180, 0x0184, ... , 0x01bc)
+  add tmu_offset7, tmu_offset5, r0    # (0x01c0, 0x01c4, ... , 0x01fc)
+.endm
+
+.macro mem_setup
+  mov r0, qpu_num
+  mov r1, vpm_setup(1, 1, h32(0,0))
+  shl r2, r0, 3                       # 0x0000 / 0x0008 / ... / 0x0038
+  or vpm_value, r1, r2
+  mov vdw_value, vdw_setup(64, 16, dma_h32(0,0))
+  shl vdw_offset, r0, 9               # 0x0000 / 0x0200 / ... / 0x0e00
+.endm
+
+.macro loop_start
+  brr loop, -
+  mov loop_count, unif
+  nop
+  nop
+.endm
+
+.macro loop_end
+  sub.setf loop_count, loop_count, 1
+  bra.anynz -, loop
+  nop
+  nop
+  nop
+.endm
+
+.macro tmu_fetch, addr
+  add r0, addr, vdw_offset
+  add t0s, r0, tmu_offset0
+  add t0s, r0, tmu_offset1
+  add t0s, r0, tmu_offset2
+  add t0s, r0, tmu_offset3
+  add t1s, r0, tmu_offset4
+  add t1s, r0, tmu_offset5
+  add t1s, r0, tmu_offset6
+  add t1s, r0, tmu_offset7
+.endm
+
+.macro tmu_load
+  ldtmu0
+  mov arg0, r4
+  ldtmu0
+  mov arg1, r4
+  ldtmu0
+  mov arg2, r4
+  ldtmu0
+  mov arg3, r4
+  ldtmu1
+  mov arg4, r4
+  ldtmu1
+  mov arg5, r4
+  ldtmu1
+  mov arg6, r4
+  ldtmu1
+  mov arg7, r4
+.endm
+
+.macro vpm_write
+  mov vw_setup, vpm_value
+  read mutex
+  mov vpm, var0
+  mov vpm, var1
+  mov vpm, var2
+  mov vpm, var3
+  mov vpm, var4
+  mov vpm, var5
+  mov vpm, var6
+  mov vpm, var7
+  mov mutex, -
+.endm
+
+.macro vdw_store, addr
+  mov vw_setup, vdw_value
+  add vw_addr, addr, vdw_offset
+  read vw_wait
+.endm
+
+.macro exit, flag
+  mov interrupt, 1
+  nop; nop; thrend
+  nop
+  nop
+.endm

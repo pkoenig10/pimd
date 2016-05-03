@@ -1,8 +1,10 @@
-fmax ra0, ra0, rb0
-fmax ra1, ra1, rb1
-fmax ra2, ra2, rb2
-fmax ra3, ra3, rb3
-fmax ra4, ra4, rb4
-fmax ra5, ra5, rb5
-fmax ra6, ra6, rb6
-fmax ra7, ra7, rb7
+.include "pimd.qinc"
+
+fmax var0, var0, arg0
+fmax var1, var1, arg1
+fmax var2, var2, arg2
+fmax var3, var3, arg3
+fmax var4, var4, arg4
+fmax var5, var5, arg5
+fmax var6, var6, arg6
+fmax var7, var7, arg7

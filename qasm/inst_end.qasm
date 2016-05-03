@@ -1,11 +1,18 @@
-.include <helpers.qasm>
+.include "pimd.qinc"
 
-sub.setf ra21, ra21, 1		# Decrement the loop counter
 mov r0, 4096
-add ra18, ra18, r0 			# Update QPU TMU fetch offsets
-bra.anynz -, ra20			# Loop condition
+add vdw_offset, vdw_offset, r0       # Update QPU TMU fetch offsets
+
+loop_end
+
+mov.setf -, qpu_num
+brr.allnz -, r:slave
 nop
 nop
 nop
 
-END_PROGRAM_HARD
+master:
+	exit 1
+
+slave:
+	exit 0

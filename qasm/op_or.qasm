@@ -1,8 +1,10 @@
-or ra0, ra0, rb0
-or ra1, ra1, rb1
-or ra2, ra2, rb2
-or ra3, ra3, rb3
-or ra4, ra4, rb4
-or ra5, ra5, rb5
-or ra6, ra6, rb6
-or ra7, ra7, rb7
+.include "pimd.qinc"
+
+or var0, var0, arg0
+or var1, var1, arg1
+or var2, var2, arg2
+or var3, var3, arg3
+or var4, var4, arg4
+or var5, var5, arg5
+or var6, var6, arg6
+or var7, var7, arg7

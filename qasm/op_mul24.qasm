@@ -1,8 +1,10 @@
-mul24 ra0, ra0, rb0
-mul24 ra1, ra1, rb1
-mul24 ra2, ra2, rb2
-mul24 ra3, ra3, rb3
-mul24 ra4, ra4, rb4
-mul24 ra5, ra5, rb5
-mul24 ra6, ra6, rb6
-mul24 ra7, ra7, rb7
+.include "pimd.qinc"
+
+mul24 var0, var0, arg0
+mul24 var1, var1, arg1
+mul24 var2, var2, arg2
+mul24 var3, var3, arg3
+mul24 var4, var4, arg4
+mul24 var5, var5, arg5
+mul24 var6, var6, arg6
+mul24 var7, var7, arg7
