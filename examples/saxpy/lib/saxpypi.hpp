@@ -1,4 +1,3 @@
-#include "../../pimd.h"
 
 void saxpy_pi(int N, 
                 float scale,

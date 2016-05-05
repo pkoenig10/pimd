@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <algorithm>
 #include <time.h>
+
 #include "saxpy.hpp"
 #include "saxpySerial.hpp"
 #include "saxpypi.hpp"
@@ -21,7 +22,7 @@ toGFLOPS(int ops, float sec) {
 
 int main() {
 
-    const unsigned int N = 20 * 1000 * 1000; // 20 M element vectors (~80 MB)
+    const unsigned int N = 20 * 1000; //* 1000; // 20 M element vectors (~80 MB)
     const unsigned int TOTAL_BYTES = 4 * N * sizeof(float);
     const unsigned int TOTAL_FLOPS = 2 * N;
     float scale = 2.f;
@@ -78,7 +79,6 @@ int main() {
     // Clear out the buffer
     for (unsigned int i = 0; i < N; ++i)
         result[i] = 0.f;
-
 
     double minPI = 1e30;
     for (int i = 0; i < 3; ++i) {
