@@ -1,11 +1,11 @@
-.set var0,           ra0           
-.set var1,           ra1
-.set var2,           ra2
-.set var3,           ra3
-.set var4,           ra4
-.set var5,           ra5
-.set var6,           ra6
-.set var7,           ra7
+.set val0,           ra0           
+.set val1,           ra1
+.set val2,           ra2
+.set val3,           ra3
+.set val4,           ra4
+.set val5,           ra5
+.set val6,           ra6
+.set val7,           ra7
 
 .set arg0,           rb0
 .set arg1,           rb1
@@ -15,6 +15,44 @@
 .set arg5,           rb5
 .set arg6,           rb6
 .set arg7,           rb7
+
+
+.set var00,         ra8           
+.set var01,         ra9
+.set var02,         ra10
+.set var03,         ra11
+.set var04,         ra12
+.set var05,         ra13
+.set var06,         ra14
+.set var07,         ra15
+
+.set var10,         ra16          
+.set var11,         ra17
+.set var12,         ra18
+.set var13,         ra19
+.set var14,         ra20
+.set var15,         ra21
+.set var16,         ra22
+.set var17,         ra23
+
+.set var20,         rb8           
+.set var21,         rb9
+.set var22,         rb10
+.set var23,         rb11
+.set var24,         rb12
+.set var25,         rb13
+.set var26,         rb14
+.set var27,         rb15
+
+.set var30,         rb16          
+.set var31,         rb17
+.set var32,         rb18
+.set var33,         rb19
+.set var34,         rb20
+.set var35,         rb21
+.set var36,         rb22
+.set var37,         rb23
+
 
 .set loop,          ra24
 .set loop_count,    ra25
@@ -99,6 +137,7 @@
   nop
 .endm
 
+
 .macro tmu_fetch, addr
   add r0, addr, vdw_offset
   add t0s, r0, tmu_offset0
@@ -133,14 +172,14 @@
 .macro vpm_write
   mov vw_setup, vpm_value
   read mutex
-  mov vpm, var0
-  mov vpm, var1
-  mov vpm, var2
-  mov vpm, var3
-  mov vpm, var4
-  mov vpm, var5
-  mov vpm, var6
-  mov vpm, var7
+  mov vpm, val0
+  mov vpm, val1
+  mov vpm, val2
+  mov vpm, val3
+  mov vpm, val4
+  mov vpm, val5
+  mov vpm, val6
+  mov vpm, val7
   mov mutex, -
 .endm
 

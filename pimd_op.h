@@ -3,9 +3,11 @@
 
 enum PimdOpType {
 	NONE,
+	VARIABLE,
+	SAVE,
 	SCALAR,
 	VECTOR,
-	ADDR,
+	STORE,
 };
 
 PimdOpType pimd_op_type(PimdOp op);

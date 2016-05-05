@@ -1,10 +1,10 @@
 .include "pimd.qinc"
 
-not var0, var0
-not var1, var1
-not var2, var2
-not var3, var3
-not var4, var4
-not var5, var5
-not var6, var6
-not var7, var7
+not val0, val0
+not val1, val1
+not val2, val2
+not val3, val3
+not val4, val4
+not val5, val5
+not val6, val6
+not val7, val7
