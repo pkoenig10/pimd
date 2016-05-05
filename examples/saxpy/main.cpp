@@ -3,7 +3,7 @@
 #include <time.h>
 #include "saxpy.hpp"
 #include "saxpySerial.hpp"
-
+#include "saxpypi.hpp"
 
 
 // return GB/s
@@ -80,9 +80,23 @@ int main() {
         result[i] = 0.f;
 
 
+    double minPI = 1e30;
+    for (int i = 0; i < 3; ++i) {
+        clock_t startTime = clock();
+        saxpy_pi(N, scale, arrayX, arrayY, result);
+        clock_t endTime = clock();
+        minNEON = std::min(minPI,(double)(endTime-startTime)/CLOCKS_PER_SEC);
+    }
+    printf("[saxpy PI]:\t\t[%.3f] ms\t[%.3f] GB/s\t[%.3f] GFLOPS\n",
+           minPI* 1000,
+           toBW(TOTAL_BYTES, minPI),
+           toGFLOPS(TOTAL_FLOPS, minPI));
+
+
 
     printf("\t\t\t\t(%.2fx speedup from NEON)\n", minSerial/minNEON);
-    //printf("\t\t\t\t(%.2fx speedup from task ISPC)\n", minSerial/minTaskISPC);
+    printf("\t\t\t\t(%.2fx speedup from PIGPU)\n", minSerial/minPI);
+    printf("\t\t\t\t(%.2fx speedup from NEON to PIGPU)\n", minNEON/minPI);
 
     delete[] arrayX;
     delete[] arrayY;
