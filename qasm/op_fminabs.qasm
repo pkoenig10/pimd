@@ -1,10 +1,10 @@
 .include "pimd.qinc"
 
-fminabs var0, var0, arg0
-fminabs var1, var1, arg1
-fminabs var2, var2, arg2
-fminabs var3, var3, arg3
-fminabs var4, var4, arg4
-fminabs var5, var5, arg5
-fminabs var6, var6, arg6
-fminabs var7, var7, arg7
+fminabs val0, val0, arg0
+fminabs val1, val1, arg1
+fminabs val2, val2, arg2
+fminabs val3, val3, arg3
+fminabs val4, val4, arg4
+fminabs val5, val5, arg5
+fminabs val6, val6, arg6
+fminabs val7, val7, arg7

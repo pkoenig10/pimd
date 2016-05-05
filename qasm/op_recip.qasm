@@ -1,20 +1,33 @@
 .include "pimd.qinc"
 
-mov recip, var0
+mov recip, val0
 nop
-mov recip, var1
-mov var0, r4
-mov recip, var2
-mov var1, r4
-mov recip, var3
-mov var2, r4
-mov recip, var4
-mov var3, r4
-mov recip, var5
-mov var4, r4
-mov recip, var6
-mov var5, r4
-mov recip, var7
-mov var6, r4
 nop
-mov var7, r4
+mov val0, r4
+mov recip, val1
+nop
+nop
+mov val1, r4
+mov recip, val2
+nop
+nop
+mov val2, r4
+mov recip, val3
+nop
+nop
+mov val3, r4
+mov recip, val4
+nop
+nop
+mov val4, r4
+mov recip, val5
+nop
+nop
+mov val5, r4
+mov recip, val6
+nop
+nop
+mov val6, r4
+mov recip, val7
+nop
+mov val7, r4

@@ -1,10 +1,10 @@
 .include "pimd.qinc"
 
-shr var0, var0, arg0
-shr var1, var1, arg1
-shr var2, var2, arg2
-shr var3, var3, arg3
-shr var4, var4, arg4
-shr var5, var5, arg5
-shr var6, var6, arg6
-shr var7, var7, arg7
+shr val0, val0, arg0
+shr val1, val1, arg1
+shr val2, val2, arg2
+shr val3, val3, arg3
+shr val4, val4, arg4
+shr val5, val5, arg5
+shr val6, val6, arg6
+shr val7, val7, arg7

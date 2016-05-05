@@ -1,10 +1,10 @@
 .include "pimd.qinc"
 
-fmaxabs var0, var0, arg0
-fmaxabs var1, var1, arg1
-fmaxabs var2, var2, arg2
-fmaxabs var3, var3, arg3
-fmaxabs var4, var4, arg4
-fmaxabs var5, var5, arg5
-fmaxabs var6, var6, arg6
-fmaxabs var7, var7, arg7
+fmaxabs val0, val0, arg0
+fmaxabs val1, val1, arg1
+fmaxabs val2, val2, arg2
+fmaxabs val3, val3, arg3
+fmaxabs val4, val4, arg4
+fmaxabs val5, val5, arg5
+fmaxabs val6, val6, arg6
+fmaxabs val7, val7, arg7

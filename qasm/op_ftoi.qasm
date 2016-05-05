@@ -1,10 +1,10 @@
 .include "pimd.qinc"
 
-ftoi var0, var0
-ftoi var1, var1
-ftoi var2, var2
-ftoi var3, var3
-ftoi var4, var4
-ftoi var5, var5
-ftoi var6, var6
-ftoi var7, var7
+ftoi val0, val0
+ftoi val1, val1
+ftoi val2, val2
+ftoi val3, val3
+ftoi val4, val4
+ftoi val5, val5
+ftoi val6, val6
+ftoi val7, val7

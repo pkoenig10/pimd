@@ -1,20 +1,33 @@
 .include "pimd.qinc"
 
-mov exp, var0
+mov exp, val0
 nop
-mov exp, var1
-mov var0, r4
-mov exp, var2
-mov var1, r4
-mov exp, var3
-mov var2, r4
-mov exp, var4
-mov var3, r4
-mov exp, var5
-mov var4, r4
-mov exp, var6
-mov var5, r4
-mov exp, var7
-mov var6, r4
 nop
-mov var7, r4
+mov val0, r4
+mov exp, val1
+nop
+nop
+mov val1, r4
+mov exp, val2
+nop
+nop
+mov val2, r4
+mov exp, val3
+nop
+nop
+mov val3, r4
+mov exp, val4
+nop
+nop
+mov val4, r4
+mov exp, val5
+nop
+nop
+mov val5, r4
+mov exp, val6
+nop
+nop
+mov val6, r4
+mov exp, val7
+nop
+mov val7, r4

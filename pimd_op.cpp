@@ -7,6 +7,12 @@ static unsigned op_load[] = {
 static unsigned op_store[] = {
     #include "hex/op_store.hex"
 };
+static unsigned op_open[] = {
+    #include "hex/op_open.hex"
+};
+static unsigned op_save[] = {
+    #include "hex/op_save.hex"
+};
 static unsigned op_add[] = {
     #include "hex/op_add.hex"
 };
@@ -112,6 +118,30 @@ static unsigned inst_tmu[] = {
 static unsigned inst_ldtmu[] = {
     #include "hex/inst_ldtmu.hex"
 };
+static unsigned inst_open0[] = {
+    #include "hex/inst_open0.hex"
+};
+static unsigned inst_open1[] = {
+    #include "hex/inst_open1.hex"
+};
+static unsigned inst_open2[] = {
+    #include "hex/inst_open2.hex"
+};
+static unsigned inst_open3[] = {
+    #include "hex/inst_open3.hex"
+};
+static unsigned inst_save0[] = {
+    #include "hex/inst_save0.hex"
+};
+static unsigned inst_save1[] = {
+    #include "hex/inst_save1.hex"
+};
+static unsigned inst_save2[] = {
+    #include "hex/inst_save2.hex"
+};
+static unsigned inst_save3[] = {
+    #include "hex/inst_save3.hex"
+};
 
 static struct {
     PimdOpType type;
@@ -119,65 +149,96 @@ static struct {
     unsigned *code;
 }
 pimd_ops[] = {
-    {SCALAR, sizeof(op_load),       op_load},
-    {VECTOR, sizeof(op_load),       op_load},
-    {ADDR,   sizeof(op_store),      op_store},
-    {SCALAR, sizeof(op_add),        op_add},
-    {SCALAR, sizeof(op_sub),        op_sub},
-    {SCALAR, sizeof(op_min),        op_min},
-    {SCALAR, sizeof(op_max),        op_max},
-    {SCALAR, sizeof(op_abs),        op_abs},
-    {SCALAR, sizeof(op_and),        op_and},
-    {SCALAR, sizeof(op_or),         op_or},
-    {SCALAR, sizeof(op_xor),        op_xor},
-    {SCALAR, sizeof(op_shl),        op_shl},
-    {SCALAR, sizeof(op_shr),        op_shr},
-    {SCALAR, sizeof(op_asr),        op_asr},
-    {SCALAR, sizeof(op_ror),        op_ror},
-    {SCALAR, sizeof(op_mul24),      op_mul24},
-    {SCALAR, sizeof(op_mul),        op_mul},
-    {SCALAR, sizeof(op_fadd),       op_fadd},
-    {SCALAR, sizeof(op_fsub),       op_fsub},
-    {SCALAR, sizeof(op_fmin),       op_fmin},
-    {SCALAR, sizeof(op_fmax),       op_fmax},
-    {SCALAR, sizeof(op_fminabs),    op_fminabs},
-    {SCALAR, sizeof(op_fmaxabs),    op_fmaxabs},
-    {SCALAR, sizeof(op_fmul),       op_fmul},
-    {VECTOR, sizeof(op_add),        op_add},
-    {VECTOR, sizeof(op_sub),        op_sub},
-    {VECTOR, sizeof(op_min),        op_min},
-    {VECTOR, sizeof(op_max),        op_max},
-    {VECTOR, sizeof(op_abs),        op_abs},
-    {VECTOR, sizeof(op_and),        op_and},
-    {VECTOR, sizeof(op_or),         op_or},
-    {VECTOR, sizeof(op_xor),        op_xor},
-    {VECTOR, sizeof(op_shl),        op_shl},
-    {VECTOR, sizeof(op_shr),        op_shr},
-    {VECTOR, sizeof(op_asr),        op_asr},
-    {VECTOR, sizeof(op_ror),        op_ror},
-    {VECTOR, sizeof(op_mul24),      op_mul24},
-    {VECTOR, sizeof(op_mul),        op_mul},
-    {VECTOR, sizeof(op_fadd),       op_fadd},
-    {VECTOR, sizeof(op_fsub),       op_fsub},
-    {VECTOR, sizeof(op_fmin),       op_fmin},
-    {VECTOR, sizeof(op_fmax),       op_fmax},
-    {VECTOR, sizeof(op_fminabs),    op_fminabs},
-    {VECTOR, sizeof(op_fmaxabs),    op_fmaxabs},
-    {VECTOR, sizeof(op_fmul),       op_fmul},
-    {NONE,   sizeof(op_not),        op_not},
-    {NONE,   sizeof(op_clz),        op_clz},
-    {NONE,   sizeof(op_itof),       op_itof},
-    {NONE,   sizeof(op_ftoi),       op_ftoi},
-    {NONE,   sizeof(op_exp),        op_exp},
-    {NONE,   sizeof(op_log),        op_log},
-    {NONE,   sizeof(op_recip),      op_recip},
-    {NONE,   sizeof(op_recipsqrt),  op_recipsqrt},
-    {NONE,   sizeof(op_sqrt),       op_sqrt},
-    {NONE,   sizeof(inst_start),    inst_start},
-    {NONE,   sizeof(inst_end),      inst_end},
-    {NONE,   sizeof(inst_unif),     inst_unif},
-    {NONE,   sizeof(inst_tmu),      inst_tmu},
-    {NONE,   sizeof(inst_ldtmu),    inst_ldtmu},
+    {SCALAR,    sizeof(op_load),       op_load},
+    {VECTOR,    sizeof(op_load),       op_load},
+    {STORE,     sizeof(op_store),     op_store},
+    {VARIABLE,  sizeof(op_open),    op_open},
+    {SAVE,      sizeof(op_save),        op_save},
+    {VARIABLE,  sizeof(op_add),        op_add},
+    {VARIABLE,  sizeof(op_sub),        op_sub},
+    {VARIABLE,  sizeof(op_min),        op_min},
+    {VARIABLE,  sizeof(op_max),        op_max},
+    {VARIABLE,  sizeof(op_abs),        op_abs},
+    {VARIABLE,  sizeof(op_and),        op_and},
+    {VARIABLE,  sizeof(op_or),         op_or},
+    {VARIABLE,  sizeof(op_xor),        op_xor},
+    {VARIABLE,  sizeof(op_shl),        op_shl},
+    {VARIABLE,  sizeof(op_shr),        op_shr},
+    {VARIABLE,  sizeof(op_asr),        op_asr},
+    {VARIABLE,  sizeof(op_ror),        op_ror},
+    {VARIABLE,  sizeof(op_mul24),      op_mul24},
+    {VARIABLE,  sizeof(op_mul),        op_mul},
+    {VARIABLE,  sizeof(op_fadd),       op_fadd},
+    {VARIABLE,  sizeof(op_fsub),       op_fsub},
+    {VARIABLE,  sizeof(op_fmin),       op_fmin},
+    {VARIABLE,  sizeof(op_fmax),       op_fmax},
+    {VARIABLE,  sizeof(op_fminabs),    op_fminabs},
+    {VARIABLE,  sizeof(op_fmaxabs),    op_fmaxabs},
+    {VARIABLE,  sizeof(op_fmul),       op_fmul},
+    {SCALAR,    sizeof(op_add),        op_add},
+    {SCALAR,    sizeof(op_sub),        op_sub},
+    {SCALAR,    sizeof(op_min),        op_min},
+    {SCALAR,    sizeof(op_max),        op_max},
+    {SCALAR,    sizeof(op_abs),        op_abs},
+    {SCALAR,    sizeof(op_and),        op_and},
+    {SCALAR,    sizeof(op_or),         op_or},
+    {SCALAR,    sizeof(op_xor),        op_xor},
+    {SCALAR,    sizeof(op_shl),        op_shl},
+    {SCALAR,    sizeof(op_shr),        op_shr},
+    {SCALAR,    sizeof(op_asr),        op_asr},
+    {SCALAR,    sizeof(op_ror),        op_ror},
+    {SCALAR,    sizeof(op_mul24),      op_mul24},
+    {SCALAR,    sizeof(op_mul),        op_mul},
+    {SCALAR,    sizeof(op_fadd),       op_fadd},
+    {SCALAR,    sizeof(op_fsub),       op_fsub},
+    {SCALAR,    sizeof(op_fmin),       op_fmin},
+    {SCALAR,    sizeof(op_fmax),       op_fmax},
+    {SCALAR,    sizeof(op_fminabs),    op_fminabs},
+    {SCALAR,    sizeof(op_fmaxabs),    op_fmaxabs},
+    {SCALAR,    sizeof(op_fmul),       op_fmul},
+    {VECTOR,    sizeof(op_add),        op_add},
+    {VECTOR,    sizeof(op_sub),        op_sub},
+    {VECTOR,    sizeof(op_min),        op_min},
+    {VECTOR,    sizeof(op_max),        op_max},
+    {VECTOR,    sizeof(op_abs),        op_abs},
+    {VECTOR,    sizeof(op_and),        op_and},
+    {VECTOR,    sizeof(op_or),         op_or},
+    {VECTOR,    sizeof(op_xor),        op_xor},
+    {VECTOR,    sizeof(op_shl),        op_shl},
+    {VECTOR,    sizeof(op_shr),        op_shr},
+    {VECTOR,    sizeof(op_asr),        op_asr},
+    {VECTOR,    sizeof(op_ror),        op_ror},
+    {VECTOR,    sizeof(op_mul24),      op_mul24},
+    {VECTOR,    sizeof(op_mul),        op_mul},
+    {VECTOR,    sizeof(op_fadd),       op_fadd},
+    {VECTOR,    sizeof(op_fsub),       op_fsub},
+    {VECTOR,    sizeof(op_fmin),       op_fmin},
+    {VECTOR,    sizeof(op_fmax),       op_fmax},
+    {VECTOR,    sizeof(op_fminabs),    op_fminabs},
+    {VECTOR,    sizeof(op_fmaxabs),    op_fmaxabs},
+    {VECTOR,    sizeof(op_fmul),       op_fmul},
+    {NONE,      sizeof(op_not),        op_not},
+    {NONE,      sizeof(op_clz),        op_clz},
+    {NONE,      sizeof(op_itof),       op_itof},
+    {NONE,      sizeof(op_ftoi),       op_ftoi},
+    {NONE,      sizeof(op_exp),        op_exp},
+    {NONE,      sizeof(op_log),        op_log},
+    {NONE,      sizeof(op_recip),      op_recip},
+    {NONE,      sizeof(op_recipsqrt),  op_recipsqrt},
+    {NONE,      sizeof(op_sqrt),       op_sqrt},
+    {NONE,      sizeof(inst_start),    inst_start},
+    {NONE,      sizeof(inst_end),      inst_end},
+    {NONE,      sizeof(inst_unif),     inst_unif},
+    {NONE,      sizeof(inst_tmu),      inst_tmu},
+    {NONE,      sizeof(inst_ldtmu),    inst_ldtmu},
+    {NONE,      sizeof(inst_open0),    inst_open0},
+    {NONE,      sizeof(inst_open1),    inst_open1},
+    {NONE,      sizeof(inst_open2),    inst_open2},
+    {NONE,      sizeof(inst_open3),    inst_open3},
+    {NONE,      sizeof(inst_save0),    inst_save0},
+    {NONE,      sizeof(inst_save1),    inst_save1},
+    {NONE,      sizeof(inst_save2),    inst_save2},
+    {NONE,      sizeof(inst_save3),    inst_save3},
 };
 
 
