@@ -12,23 +12,17 @@ double saxpy_pi(int N,
                 float *result){
     
     int mb = pimd_open();
-    //CREATE FUNCTION 
-    std::vector<PimdOp> ops;
-    ops.push_back(OP_VLOAD); 
-    ops.push_back(OP_SFMUL);
-    ops.push_back(OP_VFADD);
-    ops.push_back(OP_STORE);
+    //CREATE FUNCTION         //PASS ARGS
+    std::vector<PimdOp> ops; std::vector<PimdArg> args;
+    ops.push_back(OP_VLOAD); args.push_back(X);
+    ops.push_back(OP_SFMUL); args.push_back(scale);
+    ops.push_back(OP_VFADD); args.push_back(Y);
+    ops.push_back(OP_STORE); args.push_back(result);
 
-    //PASS ARGS
-    std::vector<PimdArg> args;
-    args.push_back(X);
-    args.push_back(scale);
-    args.push_back(Y);
-    args.push_back(result);
 
 
     PimdFunction axpy = PimdFunction(mb,&ops[0],ops.size());
-	//Dying inside call
+
     clock_t start = clock();
     int ret = axpy.call(&args[0], args.size(), N, 10000);
     clock_t end = clock(); 
