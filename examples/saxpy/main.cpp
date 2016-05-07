@@ -82,10 +82,8 @@ int main() {
 
     double minPI = 1e30;
     for (int i = 0; i < 3; ++i) {
-        clock_t startTime = clock();
-        saxpy_pi(N, scale, arrayX, arrayY, result);
-        clock_t endTime = clock();
-        minPI = std::min(minPI,(double)(endTime-startTime)/CLOCKS_PER_SEC);
+        double time = saxpy_pi(N, scale, arrayX, arrayY, result);
+        minPI = std::min(minPI,(double)(time)/CLOCKS_PER_SEC);
     }
     printf("[saxpy PI]:\t\t[%.3f] ms\t[%.3f] GB/s\t[%.3f] GFLOPS\n",
            minPI* 1000,

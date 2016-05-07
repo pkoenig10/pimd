@@ -1,5 +1,5 @@
 
-void saxpy_pi(int N, 
+double saxpy_pi(int N, 
                 float scale,
                 float *X,
                 float *Y,

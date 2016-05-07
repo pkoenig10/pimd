@@ -1,9 +1,11 @@
 #include "saxpypi.hpp"
 #include <stdio.h>
 #include <vector>
+#include <time.h>
+#include <algorithm>
 #include "pimd.h"
 
-void saxpy_pi(int N,
+double saxpy_pi(int N,
                 float scale,
                 float *X,
                 float *Y,
@@ -27,12 +29,14 @@ void saxpy_pi(int N,
 
     PimdFunction axpy = PimdFunction(mb,&ops[0],ops.size());
 	//Dying inside call
+    clock_t start = clock();
     int ret = axpy.call(&args[0], args.size(), N, 10000);
-    
+    clock_t end = clock(); 
     if(ret < 0){
         fprintf(stderr,"ERROR = %d\n", -ret);
-        return;
+        return 1e30;
     }
     axpy.free();
     pimd_close(mb);
+    return (double)end-start;
 }
