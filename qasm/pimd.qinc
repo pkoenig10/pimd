@@ -54,11 +54,14 @@
 .set var37,         rb23
 
 
-.set loop,          ra24
-.set loop_count,    ra25
-.set vpm_value,     ra26
-.set vdw_value,     ra27
-.set vdw_offset,    ra28
+.set main_loop,     ra24
+.set main_count,    ra25
+.set inner_loop,    ra26
+.set inner_count,   ra27
+.set while_loop,    ra28
+.set vpm_value,     ra29
+.set vdw_value,     ra30
+.set vdw_offset,    ra31
 
 .set tmu_offset0,   rb24 
 .set tmu_offset1,   rb25
@@ -122,19 +125,23 @@
   shl vdw_offset, r0, 9               # 0x0000 / 0x0200 / ... / 0x0e00
 .endm
 
-.macro loop_start
+.macro loop_start, loop, count, val
   brr loop, -
-  mov loop_count, unif
+  mov count, val
   nop
   nop
 .endm
 
-.macro loop_end
+.macro loop_end, loop, count
   sub.setf loop_count, loop_count, 1
   bra.anynz -, loop
   nop
   nop
   nop
+.endm
+
+.macro clear_flags
+  mov.setf -, 1
 .endm
 
 

@@ -1,3 +1,3 @@
 .include "pimd.qinc"
 
-tmu_fetch unif
+mov tmu0, unif

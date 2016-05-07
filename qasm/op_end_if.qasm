@@ -1,3 +1,3 @@
 .include "pimd.qinc"
 
-tmu_load
+clear_flags

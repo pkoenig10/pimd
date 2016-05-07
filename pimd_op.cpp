@@ -112,11 +112,17 @@ static unsigned inst_end[] = {
 static unsigned inst_unif[] = {
     #include "hex/inst_unif.hex"
 };
-static unsigned inst_tmu[] = {
-    #include "hex/inst_tmu.hex"
+static unsigned inst_tmu0[] = {
+    #include "hex/inst_tmu0.hex"
 };
-static unsigned inst_ldtmu[] = {
-    #include "hex/inst_ldtmu.hex"
+static unsigned inst_tmu1[] = {
+    #include "hex/inst_tmu1.hex"
+};
+static unsigned inst_ldtmu0[] = {
+    #include "hex/inst_ldtmu0.hex"
+};
+static unsigned inst_ldtmu1[] = {
+    #include "hex/inst_ldtmu1.hex"
 };
 static unsigned inst_open0[] = {
     #include "hex/inst_open0.hex"
@@ -151,9 +157,9 @@ static struct {
 pimd_ops[] = {
     {SCALAR,    sizeof(op_load),       op_load},
     {VECTOR,    sizeof(op_load),       op_load},
-    {STORE,     sizeof(op_store),     op_store},
-    {VARIABLE,  sizeof(op_open),    op_open},
-    {SAVE,      sizeof(op_save),        op_save},
+    {STORE,     sizeof(op_store),      op_store},
+    {VARIABLE,  sizeof(op_open),       op_open},
+    {SAVE,      sizeof(op_save),       op_save},
     {VARIABLE,  sizeof(op_add),        op_add},
     {VARIABLE,  sizeof(op_sub),        op_sub},
     {VARIABLE,  sizeof(op_min),        op_min},
@@ -229,8 +235,10 @@ pimd_ops[] = {
     {NONE,      sizeof(inst_start),    inst_start},
     {NONE,      sizeof(inst_end),      inst_end},
     {NONE,      sizeof(inst_unif),     inst_unif},
-    {NONE,      sizeof(inst_tmu),      inst_tmu},
-    {NONE,      sizeof(inst_ldtmu),    inst_ldtmu},
+    {NONE,      sizeof(inst_tmu0),      inst_tmu0},
+    {NONE,      sizeof(inst_tmu1),      inst_tmu1},
+    {NONE,      sizeof(inst_ldtmu0),    inst_ldtmu0},
+    {NONE,      sizeof(inst_ldtmu1),    inst_ldtmu1},
     {NONE,      sizeof(inst_open0),    inst_open0},
     {NONE,      sizeof(inst_open1),    inst_open1},
     {NONE,      sizeof(inst_open2),    inst_open2},

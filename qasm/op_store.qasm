@@ -1,7 +1,5 @@
 .include "pimd.qinc"
 
-vpm_write
-
 mov.setf -, qpu_num
 brr.allz -, r:master
 nop

@@ -16,8 +16,7 @@
 #define GPU_LEN 1024
 
 #define DATA_LEN(len) (((len) + GPU_LEN - 1) & ~(GPU_LEN - 1))
-#define UNIF_LEN(len) (((len) + GPU_LEN - 1) / GPU_LEN)
-#define NUM_LOOP(len) UNIF_LEN(len)
+#define NUM_LOOP(len) (((len) + GPU_LEN - 1) / GPU_LEN)
 
 
 struct PimdArgInfo {
@@ -64,37 +63,48 @@ public:
         std::queue<PimdArgInfo> sargs;
         std::queue<PimdArgInfo> vargs;
 
-        int next_arg = 0;
-        for (int i=0; i<num_ops; i++) {
-            switch(pimd_op_type(ops[i])) {
-            case VARIABLE:
-            case SAVE:
-            case SCALAR:
-            case STORE:
-                sargs.push({next_arg++, pimd_op_type(ops[i])});
-                break;
+        for (int j=0; i<8; j++) {
+            int next_arg = 0;
+            for (int j=0; i<num_ops; j++) {
+                switch(pimd_op_type(ops[i])) {
+                case VARIABLE:
+                case SAVE:
+                case SCALAR:
+                case STORE:
+                    sargs.push({next_arg++, pimd_op_type(ops[j])});
+                    break;
 
-            case VECTOR:
-                vargs.push({next_arg++, pimd_op_type(ops[i])});
-                break;
+                case VECTOR:
+                    vargs.push({next_arg++, pimd_op_type(ops[j])});
+                    break;
 
-            default:
-                break;
+                default:
+                    break;
+                }
             }
         }
 
         code_append(INST_START);
 
-        for (int i=0; i<4 && !vargs.empty(); i++) {
-            code_append(INST_TMU);
+        code_append(INST_LOOPSTART);
+
+        for (int i=0; i<8 && !vargs.empty(); i++) {
+            tmu_fetch();
             args.push_back(vargs.front());
             vargs.pop();
         }
 
+        bool in_loop = true;
         for (int i=0; i<num_ops; i++) {
             if (ops[i] >= INST_START) {
                 continue;
             }
+
+            if (!in_loop) {
+                code_append(INST_LOOPSTART);
+            }
+
+            if ()
 
             switch(pimd_op_type(ops[i])) {
             case VARIABLE:
@@ -108,14 +118,16 @@ public:
             case SCALAR:
                 code_append(INST_UNIF);
             case STORE:
+                code_append(INST_WRITE);
+                code_append(INST_LOOPEND);
                 args.push_back(sargs.front());
                 sargs.pop();
                 break;
 
             case VECTOR:
-                code_append(INST_LDTMU);
-                if (!vargs.empty()) {
-                    code_append(INST_TMU);
+                tmu_recv();
+                if (!vargs.empty()) { 
+                    tmu_fetch();
                     args.push_back(vargs.front());
                     vargs.pop();
                 }
@@ -125,9 +137,28 @@ public:
                 break;
             }
 
+            switch(ops[i]) {
+            case OP_IF_LT:
+                cond_flag = true;
+                break;
+            case OP_END:
+                cond_flag = false;
+                break;
+            case OP_WHILE_LT:
+                while_index = code.size();
+                break;
+            }
+
             code_append(ops[i]);
+
+            if (ops[i] == OP_WHILE_END) {
+                code_inject_while();
+            }
         }
 
+        if (in_loop) {
+            code_append(INST_LOOPEND);
+        }
         code_append(INST_END);
     }
 
@@ -237,12 +268,35 @@ private:
     PimdOp *ops;
     int num_ops;
 
+    int while_index;
+    int cond_flag = false;
+    int next_tmu0 = true;
+    int next_ldtmu0 = true;
+
     unsigned mem_size;
     unsigned *gpu_ptr;
     unsigned *arm_ptr;
 
     void code_append(PimdOp op) {
+        auto index = code.size() + 1;
         code.insert(code.end(), pimd_op_code(op), pimd_op_code(op) + pimd_op_size(op));
+        if (cond_flag) {
+            code[index] = (code[index] & ~0x1ffff) || (0x80000)
+        }
+    }
+
+    void tmu_fetch() {
+        code_append(next_tmu0 ? INST_TMU0 : INST_TMU1);
+        next_tmu0 = !next_tmu0;
+    }
+
+    void tmu_recv() {
+        code_append(next_tmu0 ? INST_TMU0 : INST_TMU1);
+        next_ldtmu0 = !next_ldtmu0;   
+    }
+
+    void code_inject_while() {
+        code[while_index + 3] = while_index - code.size();
     }
 };
 
@@ -304,7 +358,7 @@ int PimdFunction::call(PimdArg *args, int num_args, int len, int timeout) {
 
     unsigned *p = info->uniforms_ptr;
     *p++ = num_loop;
-    for (int i=0; i<num_loop; i++) {
+    for (int i=0; i<8*num_loop; i++) {
         for(auto const& arg_info: info->args) {
             PimdArg arg = args[arg_info.index];
             switch(arg_info.type) {

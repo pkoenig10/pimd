@@ -4,4 +4,6 @@ tmu_setup
 
 mem_setup
 
-loop_start
+vpm_write
+
+loop_start main_loop, main_count, unif
