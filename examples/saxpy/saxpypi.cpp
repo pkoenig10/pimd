@@ -23,14 +23,13 @@ double saxpy_pi(int N,
 
     PimdFunction axpy = PimdFunction(mb,&ops[0],ops.size());
 
-    clock_t start = clock();
-    int ret = axpy.call(&args[0], args.size(), N, 10000);
-    clock_t end = clock(); 
-    if(ret < 0){
-        fprintf(stderr,"ERROR = %d\n", -ret);
+    double ret = axpy.call(&args[0], args.size(), N, 10000);
+    
+    if(ret < 0.f){
+        fprintf(stderr,"ERROR = %f\n", -ret);
         return 1e30;
     }
     axpy.free();
     pimd_close(mb);
-    return (double)end-start;
+    return ret;
 }

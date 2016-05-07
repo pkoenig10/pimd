@@ -9,7 +9,7 @@ void saxpy_NEON(int N,
 {
     float32x4_t scaleVec = vdupq_n_f32(scale);
     float32x4_t Xvec,Yvec,resultVec;
-    for (int i = 0; i < N; i+=8){
+    for (int i = 0; i < N; i+=4){
         Xvec = vld1q_f32(X+i);
         Yvec = vld1q_f32((Y+i));
         Xvec = vmulq_f32(Xvec,scaleVec);
