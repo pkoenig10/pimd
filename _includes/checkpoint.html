@@ -22,7 +22,7 @@
 
                 <br>
 
-                <p>We have also looked at some existing code in order to simply get something to run successfully on the QPU.  At the moment we are simply trying to echo back a given input using the QPUs.  Specifically we are looking at <a href="https://github.com/elorimer/rpi-playground">rpi-playground</a> as well a samples code included with the vc4asm assembler.</p>
+                <p>We have also looked at some <a href="https://github.com/hermanhermitage/videocoreiv-qpu">existing code</a> and have successfuly run trivial programs on the QPU.  We have also done a significant amount of informal testing in order to better understand the capabilities and limitations of various parts of the GPU architecture and instruction set, including TMU memory fetches, VPM memory writes, branch statements, and QPU synchronization instructions.</p>
             </div>
         </div>
 
@@ -52,7 +52,7 @@
             <div class="col-lg-12">
                 <h3>Issues and Concerns</h3>
 
-                <p>We are dealing with some difficult issues getting code to successfully run on the QPUs. Specifically we are experiencing hangs when interfacing with the GPU using the <a href"https://en.wikipedia.org/wiki/Ioctl">ioctl</a> system call within the mailbox interface. It appears that these issues are related to the handling of memory-mapped I/O, which is necessary to transfer data to/from the GPU. However we are confident this issues can be resolved quickly. This is likely the last significant issue we encounter and finishing the library will be relatively easy once it is resolved.</p>
+                <p>As mentioned previously, we know have a solid understanding of the GPU architecture and how to interface with it. So there are no major issues regarding knowledge of the problem. The majority of work going forward will be designing and implementing our library as well as writing the multiple implementations of the algorithms we will use to test our library. There will likely be some significant design considerations and trade-offs we make when defining the interface for our library. While these are not explicit concerns, they are decisions that have to be made thoughtfully to ensure that our library is general purpose and easy-to-use while remaining powerful.
             </div>
         </div>
     </div>

@@ -3,13 +3,209 @@
     <div class="container">
         <div class="row">
             <div class="col-lg-12">
-                <h2>Write Up</h2>
+                <h1>Writeup</h1>
             </div>
         </div>
+
         <div class="row">
-            <br>
             <div class="col-lg-12">
-                <p>Write up text goes here.</p>
+                <h3>Summary</h3>
+
+                <p>PiMD is a SIMD intrinsics library for the Broadcom VideoCoreIV-AG100-R GPU found on all Raspberry Pi models.  Currently there does not exist any general purpose libraries for the Raspberry Pi GPU. The goal of this library is to provide an accessible interface for taking advantage of the SIMD processors in the GPU, while providing performance comparable to application-specific QPU code.  Our library is extremely versatile and can be used to implement nearly any purely data parallel algorithm.</p>
+            </div>
+        </div>
+
+        <br>
+
+        <div class="row">
+            <div class="col-lg-12">
+                <h3>Background</h3>
+
+                <p style="padding-bottom: 10px">For more complete information about the Raspberry Pi's GPU, please see the <a href="http://www.broadcom.com/docs/support/videocore/VideoCoreIV-AG100-R.pdf">VideoCore IV 3D Architecture Reference Guide</a>.</p>
+
+                <h4>QPU</h4>
+
+                <p>At the core of VideoCore IV graphics processing unit is a set of 12 special purpose floating-point shader processors, termed Quad Processors (QPUs). Each QPU can be regarded as a 16-way 32-bit SIMD processor with an instruction cycle time of four system clocks. Our library only uses 8 of the QPUs in order to make it easier to evenly divide work among the QPUs (see VPM).</p>
+
+                <br>
+
+                <h4>Registers</h4>
+
+                <p>Each QPU contains four general-purpose accumulators as well as two large register-file memories, each with 64 registers. 32 locations on each of the A and B regfiles are general purpose registers while the other 32 are used to access register-space I/O. Our library uses the first 32 locations on each regfile to maintain user-defined variables during computation.</p>
+
+                <br>
+
+                <h4>Uniforms</h4>
+
+                <p>Uniforms are 32-bit values stored in memory that can be read in sequentially be the QPU. Our library uses uniforms to pass in function arguments, including memory address for general memory lookups (see TMU).</p>
+
+                <br>
+
+                <h4>TMU</h4>
+
+                <p>Each QPU has shared access to two Texture and Memory Lookup Unit (TMUs). The TMUs can be used for general memory lookups.  Each TMU has a FIFO request queue, allowing the pipelining up of to four memory requests.  Our library takes full advantage of this by aggressively prefetching data in order hide the latency of memory accesses.</p>
+
+                <br>
+
+                <h4>VPM</h4>
+
+                <p>The Vertex Pipeline Memory is a 4KB memory buffer shared among all the QPUs and intended for transferring data between the GPU and main memory. The QPUs views the VPM as a 2D array of 32-bit words, 16 words high and 64 words high. Our library partitions the VPM into 8 512 byte sections, allocating one to each QPU. Thus, each QPU is responsible for computing 8 16-wide 32-bit vectors at a time.</p>
+
+                <br>
+
+                <h4>SFU</h4>
+
+                <p>Each QPU has shared access to a Special Functions Unit (SFU) which can perform several less frequently used ‘exotic’ operations, including SQRT, RECIPSQRT, LOG, EXP. Our library provides access to these SFU functions.</p>
+
+                <p></p>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-lg-12">
+                <h3>Approach</h3>
+
+                <p>Unlike Intel or Neon SIMD intrinsics, QPU code cannot be compiled alongside CPU code. QPU code is written in an assembly language specific to the QPU and compiled separately from any CPU code. In order to run code on the QPU, the compiled byte-code and all data must be structured in a specific way and passed in shared memory to the GPU. The primary goal of library was to abstract this complicated process away from the user and allow them to easily implement data parallel algorithms without having to worry about writing assembly, transferring data, or dividing work among the QPUs.</p>
+
+                <br>
+
+                <p>We worked to make a general interface that could be used with nearly any easily parallelization problem. We designed our library around a model of defining functions, consisting of QPU operations, and calling those functions on various inputs. This familiar model, used by nearly every higher-level programming language, makes our library extremely accessible, even to novice programmers.</p>
+
+                <br>
+
+                <p>Example code that implements SAXPY using the PiMD library:</p>
+
+{% highlight c++ %}
+int saxpy(int N, float scale, float X[], float Y[], result[]) {
+    # Open the mailbox interface to interact with the GPU.
+    int mb = pimd_open();
+
+    # Define the operations
+    PimdArg ops[] = {
+        OP_VLOAD,   # Load a vector
+        OP_SFMUL,   # Scale
+        OP_VFADD,   # Second vector
+        OP_STORE    # Result
+    };
+
+    # Create the function
+    PimdFunction function = PimdFunction(mb, ops, 4);
+
+    # Define the PiMD arguments
+    PimdArg args[] = {
+        &X,         # Input vector
+        scale,      # Scale
+        &Y,         # Second vector
+        &result     # Result
+    };
+
+    # Call the function
+    int ret = function.call(args, 4, N, 10000);
+
+    # Free the shared memory mapped by the function call
+    function.free();
+
+    # Close the mailbox interface
+    pimd_close(mb);
+
+    return ret;
+}
+{% endhighlight %}
+
+            <br>
+
+            <h4>Abstraction</h4>
+
+            <p>Our model abstracts away all notions of size related to the QPU execution. From the users perspective, operations are being applied to every element in their input array simultaneously. In our model, there is a single working vector to which all operations are applied. Arguments to operations on this working vector are fetched and loaded automatically by our library, which optimally prefetches values in order to hide memory latency. In addition there are 4 hardware variables that can be used to store and retrieve variables during computation.  These variables are implemented as groups of registers, allowing users to use multiple variables without requiring more expensive memory requests.</p>
+
+            <br>
+
+            <h4>Operations</h4>
+
+            <p>Our library defines a set of operations that correspond to instructions on the QPU. Users create QPU functions by defining a series of these instructions. As you can see in the SAXPY example above, our function is defined as a vector load, a scalar float multiply, a vector float add, and a store. Each operation defines the input that it requires (for example, OP_ADD, OP_SADD, and OP_VADD take a variable, scalar, and vector argument respectively). This interface is simple, yet powerful by having function operations that map almost directly to hardware instructions.</p>
+
+            <br>
+
+            <h4>Arguments</h4>
+
+            <p>Arguments passed to PiMD functions must adhere to the specification implicitly defined by the series of operations that compose that function. In order to minimize boilerplate code needed to define arguments, the burden of ensuring that arguments are the correct type is passed along to the user.  As a result, the same syntax is used to create arguments from integers, floats, and pointers, which can be seen in the SAXPY example above.</p>
+            </div>
+        </div>
+
+        <br>
+
+        <div class="row">
+            <div class="col-lg-12">
+                <h3>Preliminary Results</h3>
+
+                <p>We are still in the testing/results phase for our project.  Our full testing plan and what we plan to show at the parallelism competition is detailed below.  We have done some preliminary testing using a SAXPY implementation with 80MB inputs (2M elements).  We performed this computation using a CPU-only implementation, a NEON SIMD implementation, and PiMD implementation. The results were promising and are detailed below.</p>
+
+                <ul>
+                    <li><strong>Speedup over CPU-only: </strong> 3.2x</li>
+                    <li><strong>Speedup over NEON SIMD:</strong> 2.2x</li>
+                </ul>
+
+                <br>
+
+                <p>In order to assess the performance of our library, we will compare the performance of a variety of functions on the following implementations.  The comparison to QPU assembly will be especially insightful because it will allow us to measure the inefficiencies introduced by using our library instead of writing application-specific assembly functions.</p>
+
+                <ul>
+                    <li>CPU, single-threaded</li>
+                    <li>CPU, multi-threaded</li>
+                    <li>CPU NEON SIMD, single-threaded</li>
+                    <li>CPU NEON SIMD, multi-threaded</li>
+                    <li>PiMD GPU library</li>
+                    <li>QPU assembly</li>
+                </ul>
+
+                <p>We will be testing functions that encompass a wide variety of memory and computation profiles in order to see where our library performs will and where it may be outperformed by existing methods.</p>
+                <ul>
+                    <li>Benchmarks</li>
+                    <ul>
+                        <li><strong>Bandwidth-Bound:</strong> Repeatedly load from and store to main memory. We will use a large enough collection of memory addresses to ensure that values are not being cached. We will vary the number of times of repetition.</li>
+                        <li><strong>Compute-Bound:</strong> Repeatedly perform a arithmetic operation. We will vary the number of times of repetition.</li>
+                    </ul>
+                    <li>Algorithms</li>
+                    <ul>
+                        <li><strong>SAXPY</strong></li>
+                    </ul>
+                    <li>Image Processing</li>
+                    <ul>
+                        <li><strong>RGB Manipulation:</strong> Single image tint, shade, color swap, and opacity filters.</li>
+                        <li><strong>Blend Images:</strong> Blend multiple images according to given parameters for each channel.</li>
+                        <li><strong>Edge Detection:</strong> Compute pixel differences implementing edge detection.</li>s
+                        <li><strong>Gaussian Blur:</strong> 2D convolution implementing a Gaussian blur.</li>
+                    </ul>
+                    </ul>
+                </ul>
+            </div>
+        </div>
+
+        <br>
+
+        <!--
+        <div class="row">
+            <div class="col-lg-12">
+                <h3>Future Work</h3>
+            </div>
+        </div>
+
+        <br>
+        -->
+
+        <div class="row">
+            <div class="col-lg-12">
+                <h3>References</h3>
+
+                <ol>
+                    <li>VideoCore IV 3D Architecture Reference Guide - <small><a href="http://www.broadcom.com/docs/support/videocore/VideoCoreIV-AG100-R.pdf">http://www.broadcom.com/docs/support/videocore/VideoCoreIV-AG100-R.pdf</a></small></li>
+
+                    <li>vc4asm Macroassembler for VideoCore IV - <small><a href="http://maazl.de/project/vc4asm/doc">http://maazl.de/project/vc4asm/doc</a></small></li>
+
+                    <li>Raspberry Pi ARM side GPU libraries - <small><a href="https://github.com/raspberrypi/userland">https://github.com/raspberrypi/userland</a></small></li>
+
+                    <li>Videocore QPU Tutorial - <small><a href="https://github.com/hermanhermitage/videocoreiv-qpu">https://github.com/hermanhermitage/videocoreiv-qpu</a></small></li>
+                </ol>
             </div>
         </div>
     </div>

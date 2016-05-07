@@ -49,6 +49,10 @@ h6 {
     font-weight: 700;
 }
 
+li:not(:last-child) {
+    margin-bottom: 5px;
+}
+
 .img-centered {
     margin: 0 auto;
 }
