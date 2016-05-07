@@ -1,11 +1,14 @@
 #include "floppi.h"
+
 #include "pimd.h"
+
 #include <algorithm>
 #include <vector>
+#include <stdio.h>
 
-double flop_pi(N,NUM_OPS,X,result){
+double flop_pi(int N,int NUM_OPS,float * X,float *result){
     int mb = pimd_open();
-    std::vector<PimdOp> ops; std::vector<PimdArgs> args;
+    std::vector<PimdOp> ops; std::vector<PimdArg> args;
     ops.push_back(OP_VLOAD); args.push_back(X);   
     for(int i = 0; i<NUM_OPS; i++){
         ops.push_back(OP_SFADD); args.push_back(1.f);

@@ -89,7 +89,7 @@ int main() {
 
         double minPI = 1e30;
         for (int i = 0; i < 3; ++i) {
-            double time = band_pi(N, TOTAL_OPS, arrayX , result);
+            double time = flop_pi(N, TOTAL_OPS, arrayX , result);
             minPI = std::min(minPI,(double)(time)/CLOCKS_PER_SEC);
         }
         printf("[PI]:\t\t[%.3f] ms\t[%.3f] GB/s\t[%.3f] GFLOPS\n",
