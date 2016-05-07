@@ -2,10 +2,10 @@
 #include "bandpi.h"
 
 #include <algorithm>
-#include <conio.h>
+#include <stdio.h>
+#include <vector>
 
-
-double band_pi(int N, float* X, float* Y){
+double band_pi(int N, float* X, float* result){
     int mb = pimd_open();
 
     std::vector<PimdOp> ops; std::vector<PimdArg> args;

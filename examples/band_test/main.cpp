@@ -2,6 +2,8 @@
 #include <algorithm>
 #include <time.h>
 
+#include "bandpi.h"
+#include  "arm_neon.h"
 // return GB/s
 static float
 toBW(int bytes, float sec) {
