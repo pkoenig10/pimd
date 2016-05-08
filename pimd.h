@@ -126,6 +126,7 @@ public:
     ~PimdFunction();
     
     int call(PimdArg *args, int num_args, int len, int timeout);
+    int call(PimdArg *args, int num_args, int len, int timeout, float *runtime);
     void free();
 };
 

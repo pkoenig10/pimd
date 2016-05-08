@@ -1,4 +1,5 @@
 #include <cstring>
+#include <ctime>
 #include <map>
 #include <queue>
 #include <vector>
@@ -257,6 +258,10 @@ PimdFunction::~PimdFunction() {
 }
 
 int PimdFunction::call(PimdArg *args, int num_args, int len, int timeout) {
+    return call(args, num_args, len, timeout, nullptr);
+}
+
+int PimdFunction::call(PimdArg *args, int num_args, int len, int timeout, float *runtime) {
     if (num_args != info->args.size()) {
         return -1;
     }
@@ -323,8 +328,13 @@ int PimdFunction::call(PimdArg *args, int num_args, int len, int timeout) {
         }
     }
 
+    clock_t start = clock();
     if (execute_qpu(info->mb, GPU_QPUS, info->gpu_addr(info->messages_ptr), 1, timeout)) {
         return -4;
+    }
+    clock_t end = clock();
+    if (runtime != NULL) {
+        *runtime = (float)(start - end)/CLOCKS_PER_SEC;
     }
 
     for(auto const& arg_info: info->args) {
