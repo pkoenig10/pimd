@@ -18,15 +18,16 @@ ASFLAGS = -V
 CXX = g++
 CXXFLAGS += -std=c++11 -O3 -Wall -Wextra -I $(MAILBOX_DIR)
 INSTALL = install
+MAKE = make
 RM = rm -f
 
-.PHONY: all install uninstall clean
+.PHONY: all install uninstall test clean
 
 .PRECIOUS: $(HEX_DIR)/%.hex
 
 all: $(HEX_DIR) $(OBJECT_DIR) $(TARGET)
 
-install:
+install: $(TARGET) $(HEADERS)
 	$(INSTALL) -d -m 755 $(INSTALL_PATH)/lib
 	$(INSTALL) -m 755 $(TARGET) $(INSTALL_PATH)/lib
 	$(INSTALL) -d -m 755 $(INSTALL_PATH)/include
@@ -54,5 +55,9 @@ $(HEX_DIR):
 $(OBJECT_DIR):
 	$(INSTALL) -d $(OBJECT_DIR)/
 
+test:
+	$(MAKE) -C test
+
 clean:
 	$(RM) -r $(HEX_DIR)/ $(OBJECT_DIR)/
+	$(MAKE) -C test clean
