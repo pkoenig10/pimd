@@ -89,6 +89,8 @@ int main(int argc, char** argv) {
     unsigned TOTAL_BYTES = 4 * N * sizeof(float);
     unsigned TOTAL_FLOPS = 2 * N;
 
+    printf("SAXPY: N=%d\n", N);
+
     float scale = 2.f;
     float *X = new float[N];
     float *Y = new float[N];
@@ -144,7 +146,7 @@ int main(int argc, char** argv) {
         }
         minPimd = std::min(minPimd, runtime);
     }
-
+    
     printf("[saxpy PiMD]:\t\t[%.3f] ms\t[%.3f] GB/s\t[%.3f] GFLOPS\n",
             minPimd * 1000,
             toBW(TOTAL_BYTES, minPimd),

@@ -19,33 +19,33 @@ static void usage(const char* progname) {
 }
 
 
-void flopSerial(int N, int TOTAL_OPS, float* input, float* result) {
+void flopSerial(int N, int NUM_OPS, float* input, float* result) {
     for(int i=0; i<N; i++){
         float x = input[i];
-        for(int j=0; j<TOTAL_OPS; j++){
+        for(int j=0; j<NUM_OPS; j++){
             x += 1.f; 
         } 
         result[i] = x;
     }
 }
 
-void flopNeon(int N, int TOTAL_OPS, float* input, float* result) {
+void flopNeon(int N, int NUM_OPS, float* input, float* result) {
     float32x4_t oneVec = vdupq_n_f32(1.f);
     for(int i=0; i<N; i+=4) {
         float32x4_t x = vld1q_f32(input+i);
-        for(int j=0; j<TOTAL_OPS; j++){
+        for(int j=0; j<NUM_OPS; j++){
             x = vaddq_f32(x, oneVec); 
         } 
         vst1q_f32(result+i, x);
     }
 }
 
-int flopPimd(int N, int TOTAL_OPS, float* input, float* result, float *runtime) {
+int flopPimd(int N, int NUM_OPS, float* input, float* result, float *runtime) {
     int mb = pimd_open();
 
     std::vector<PimdOp> ops; std::vector<PimdArg> args;
     ops.push_back(OP_VLOAD); args.push_back(input);
-    for (int i=0; i<TOTAL_OPS; i++) {
+    for (int i=0; i<NUM_OPS; i++) {
         ops.push_back(OP_SFADD); args.push_back(1.f);
     }
     ops.push_back(OP_STORE); args.push_back(result);
@@ -65,7 +65,7 @@ int flopPimd(int N, int TOTAL_OPS, float* input, float* result, float *runtime) 
 int main(int argc, char** argv) {
     int NUM_REPEAT = 3;
     int N = 100 * 1000; // 20 M element vectors (~80 MB)
-    int TOTAL_OPS = 1000; // 100 K operations
+    int NUM_OPS = 1000; // 100 K operations
 
     //
     // Parse command line options
@@ -87,7 +87,7 @@ int main(int argc, char** argv) {
             NUM_REPEAT = atoi(optarg);
             break;
         case 'o':
-            TOTAL_OPS = atoi(optarg);
+            NUM_OPS = atoi(optarg);
             break;
         case '?':
         default:
@@ -97,7 +97,9 @@ int main(int argc, char** argv) {
     }
 
     int TOTAL_BYTES = 2 * N * sizeof(float);
-    int TOTAL_FLOPS = TOTAL_OPS * N;
+    int TOTAL_FLOPS = NUM_OPS * N;
+
+    printf("Flop: N=%d, OPS=NUM_OPS=%d\n", N, NUM_OPS);
 
     float* input = new float[N];
     float* result = new float[N];
@@ -112,7 +114,7 @@ int main(int argc, char** argv) {
     float minSerial = 1e30;
     for (int i=0; i<NUM_REPEAT; i++) {
         clock_t startTime = clock();
-        flopSerial(N, TOTAL_OPS, input, result);
+        flopSerial(N, NUM_OPS, input, result);
         clock_t endTime = clock();
         minSerial = std::min(minSerial, ((float)(endTime - startTime))/CLOCKS_PER_SEC);
     }
@@ -128,7 +130,7 @@ int main(int argc, char** argv) {
     float minNeon = 1e30;
     for (int i=0; i<NUM_REPEAT; i++) {
         clock_t startTime = clock();
-        flopNeon(N, TOTAL_OPS, input, result);
+        flopNeon(N, NUM_OPS, input, result);
         clock_t endTime = clock();
         minNeon = std::min(minNeon, ((float)(endTime - startTime))/CLOCKS_PER_SEC);
     }
@@ -144,7 +146,7 @@ int main(int argc, char** argv) {
     float minPimd = 1e30;
     for (int i=0; i<NUM_REPEAT; i++) {
         float runtime;
-        int ret = flopPimd(N, TOTAL_OPS, input, result, &runtime);
+        int ret = flopPimd(N, NUM_OPS, input, result, &runtime);
         if (ret) {
             printf("[saxpy PiMD]:\t\tFAILED with error code %d on iteration %d\n", ret, i);
             return ret;

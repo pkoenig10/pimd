@@ -86,7 +86,7 @@ static unsigned op_mul[] = {
     #include "hex/op_mul.hex"
 };
 static unsigned op_fmul[] = {
-    #include "hex/op_mul.hex"
+    #include "hex/op_fmul.hex"
 };
 static unsigned op_exp[] = {
     #include "hex/op_exp.hex"
@@ -151,9 +151,9 @@ static struct {
 pimd_ops[] = {
     {SCALAR,    sizeof(op_load),       op_load},
     {VECTOR,    sizeof(op_load),       op_load},
-    {STORE,     sizeof(op_store),     op_store},
-    {VARIABLE,  sizeof(op_open),    op_open},
-    {SAVE,      sizeof(op_save),        op_save},
+    {STORE,     sizeof(op_store),      op_store},
+    {VARIABLE,  sizeof(op_open),       op_open},
+    {SAVE,      sizeof(op_save),       op_save},
     {VARIABLE,  sizeof(op_add),        op_add},
     {VARIABLE,  sizeof(op_sub),        op_sub},
     {VARIABLE,  sizeof(op_min),        op_min},

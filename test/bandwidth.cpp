@@ -82,6 +82,8 @@ int main(int argc, char** argv) {
     int TOTAL_BYTES = 2 * N * sizeof(float);
     int TOTAL_FLOPS = 2 * N;
 
+    printf("Bandwidth: N=%d\n", N);
+
     float* input = new float[N];
     float* result = new float[N];
     for (int i=0; i<N; i++) {

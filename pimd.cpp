@@ -3,6 +3,7 @@
 #include <map>
 #include <queue>
 #include <vector>
+#include <cstdio>
 
 #include "mailbox.h"
 #include "pimd.h"
@@ -86,7 +87,7 @@ public:
 
         code_append(INST_START);
 
-        for (int i=0; i<4 && !vargs.empty(); i++) {
+        if (!vargs.empty()) {
             code_append(INST_TMU);
             args.push_back(vargs.front());
             vargs.pop();
@@ -334,7 +335,7 @@ int PimdFunction::call(PimdArg *args, int num_args, int len, int timeout, float 
     }
     clock_t end = clock();
     if (runtime != NULL) {
-        *runtime = (float)(start - end)/CLOCKS_PER_SEC;
+        *runtime = ((float)(end - start))/CLOCKS_PER_SEC;
     }
 
     for(auto const& arg_info: info->args) {
