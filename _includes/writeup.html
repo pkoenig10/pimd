@@ -76,16 +76,18 @@
                 <p>Example code that implements SAXPY using the PiMD library:</p>
 
 {% highlight c++ %}
+#include <pimd.h>
+
 int saxpy(int N, float scale, float X[], float Y[], result[]) {
     # Open the mailbox interface to interact with the GPU.
     int mb = pimd_open();
 
     # Define the operations
     PimdArg ops[] = {
-        OP_VLOAD,   # Load a vector
-        OP_SFMUL,   # Scale
-        OP_VFADD,   # Second vector
-        OP_STORE    # Result
+        OP_VLOAD,   // Load a vector
+        OP_SFMUL,   // Scale
+        OP_VFADD,   // Second vector
+        OP_STORE    // Result
     };
 
     # Create the function
@@ -93,10 +95,10 @@ int saxpy(int N, float scale, float X[], float Y[], result[]) {
 
     # Define the PiMD arguments
     PimdArg args[] = {
-        &X,         # Input vector
-        scale,      # Scale
-        &Y,         # Second vector
-        &result     # Result
+        &X,         // Input vector
+        scale,      // Scale
+        &Y,         // Second vector
+        &result     // Result
     };
 
     # Call the function
@@ -136,62 +138,117 @@ int saxpy(int N, float scale, float X[], float Y[], result[]) {
 
         <div class="row">
             <div class="col-lg-12">
-                <h3>Preliminary Results</h3>
+                <h3>Results</h3>
 
-                <p>We are still in the testing/results phase for our project.  Our full testing plan and what we plan to show at the parallelism competition is detailed below.  We have done some preliminary testing using a SAXPY implementation with 80MB inputs (2M elements).  We performed this computation using a CPU-only implementation, a NEON SIMD implementation, and PiMD implementation. The results were promising and are detailed below.</p>
+                <br>
+
+                <h4>Testing</h4>
+
+                <p>In order to assess the performance of our library, we compared the performance of a variety of functions on the following implementations.</p>
 
                 <ul>
-                    <li><strong>Speedup over CPU-only: </strong> 3.2x</li>
-                    <li><strong>Speedup over NEON SIMD:</strong> 2.2x</li>
+                    <li>CPU, single-threaded</li>
+                    <li>CPU NEON SIMD, single-threaded</li>
+                    <li>PiMD GPU library</li>
+                </ul>
+
+                <p>We tested algorithms encompassing a variety of memory and computation profiles in order to see how our library performs what types of problems are well suited for execution on the QPU.</p>
+                <ul>
+                    <li>Benchmarks</li>
+                    <ul>
+                        <li><strong>Bandwidth-Bound:</strong> Repeatedly load and store every element in an input array to and from main memory. We used a large enough collection of memory addresses to ensure that values are not being cached. We tested this benchmark on inputs with  5M, 10M, 15M, and 20M elements.</li>
+                        <li><strong>Compute-Bound:</strong> Repeatedly perform floating-point operations on an 1024 element array. We tested this benchmark on functions with 100K, 200K, 300K, and 400K operations.</li>
+                    </ul>
+                    <li>Algorithms</li>
+                    <ul>
+                        <li><strong>SAXPY:</strong> Compute a * X + Y, where a is a scalar and X, Y are vectors. We tested SAXPY on inputs with 5M, 10M, 15M, and 20M elements.</li>
+                    </ul>
+                    <li>Image Processing</li>
+                    <ul>
+                        <li><strong>Gaussian Blur:</strong> 2D convolution implementing a Gaussian blur. We tested this function on a variety of input images and the performance and results using our library were comparable to other Gaussian blur implementations.</li>
+                    </ul>
+                    </ul>
                 </ul>
 
                 <br>
 
-                <p>In order to assess the performance of our library, we will compare the performance of a variety of functions on the following implementations.  The comparison to QPU assembly will be especially insightful because it will allow us to measure the inefficiencies introduced by using our library instead of writing application-specific assembly functions.</p>
+                <h4>Speedup</h4>
 
                 <ul>
-                    <li>CPU, single-threaded</li>
-                    <li>CPU, multi-threaded</li>
-                    <li>CPU NEON SIMD, single-threaded</li>
-                    <li>CPU NEON SIMD, multi-threaded</li>
-                    <li>PiMD GPU library</li>
-                    <li>QPU assembly</li>
+                    <li><strong>Bandwidth-Bound</strong>
+                        <div class="result">
+                            <ul>
+                                <li>NEON from Seq: <strong>1.82x</strong></li>
+                                <li>PiMD from Seq: <strong>3.76x</strong></li>
+                                <li>Pimd from NEON: <strong>2.07x</strong></li>
+                            </ul>
+                            <img src="img/bandwidth.png">
+                        </div>
+                    </li>
+                    <br>
+                    <li ><strong>Compute-Bound</strong>
+                        <div class="result">
+                            <ul>
+                                <li>NEON from Seq: <strong>1.25x</strong></li>
+                                <li>PiMD from Seq: <strong>40.66x</strong></li>
+                                <li>Pimd from NEON: <strong>32.53x</strong></li>
+                            </ul>
+                            <img src="img/flop.png">
+                        </div>
+                    </li>
+                    <br>
+                    <li><strong>SAXPY</strong>
+                        <div class="result">
+                            <ul>
+                                <li>NEON from Seq: <strong>1.11x</strong></li>
+                                <li>PiMD from Seq: <strong>3.79x</strong></li>
+                                <li>Pimd from NEON: <strong>3.41x</strong></li>
+                            </ul>
+                            <img src="img/saxpy.png">
+                        </div>
+                    </li>
                 </ul>
 
-                <p>We will be testing functions that encompass a wide variety of memory and computation profiles in order to see where our library performs will and where it may be outperformed by existing methods.</p>
+                <p>From the above graphs we can see that our library performed extremely well.  It repeatedly out-performed both the CPU and NEON SIMD implementation on all varieties of tasks.  Although these test may not be an entirely fair comparison because the CPU and NEON SIMD implementations were limited to one thread, they give us a good indiciation that the library is effective in speeding up data parallel computations.</p>
+
+                <p>We can also see that relative to the other implementations, our library performed the best on the compute bound test consisting of only floating-point operations. This suggests that the PiMD library is better suited for algorithms with high arithmetic intensities, as opposed to ones that require large memory transfers. This is unsurprising, as transferring data to and from memory is often a limiting factor in other GPUPU frameworks.</p>
+
+                <br>
+
+                <h4>Conclusion</h4>
+
+                <p>After implementing this library we learned quite a bit about the architecture and capabilities of the Broadcom VideoCoreIV-AG100-R GPU. Our major takeaways are:</p>
                 <ul>
-                    <li>Benchmarks</li>
-                    <ul>
-                        <li><strong>Bandwidth-Bound:</strong> Repeatedly load from and store to main memory. We will use a large enough collection of memory addresses to ensure that values are not being cached. We will vary the number of times of repetition.</li>
-                        <li><strong>Compute-Bound:</strong> Repeatedly perform a arithmetic operation. We will vary the number of times of repetition.</li>
-                    </ul>
-                    <li>Algorithms</li>
-                    <ul>
-                        <li><strong>SAXPY</strong></li>
-                    </ul>
-                    <li>Image Processing</li>
-                    <ul>
-                        <li><strong>RGB Manipulation:</strong> Single image tint, shade, color swap, and opacity filters.</li>
-                        <li><strong>Blend Images:</strong> Blend multiple images according to given parameters for each channel.</li>
-                        <li><strong>Edge Detection:</strong> Compute pixel differences implementing edge detection.</li>s
-                        <li><strong>Gaussian Blur:</strong> 2D convolution implementing a Gaussian blur.</li>
-                    </ul>
-                    </ul>
+                    <li>It is surprisingly powerful hardware when used effectively and efficiently. It is more than comparable with performance of the NEON SIMD on the ARM CPU.</li>
+                    <li>It is primarily limited by memory size.  The latest Raspberry Pi models only have 1GB of main memory, which severly limits the size of input data, which has to be duplicated in memory to be used on the GPU.  In addition, because the VPM memory buffer is only 4KB, QPU execution requries frequent memory transfers to store results.</li>
+                    <li>The Raspberry Pi GPU is an extremely good value, in terms of cost per FLOP, exceeding many supercomputers. However, the Raspberry Pi's hardware limitations make it impractical to exploit this for less expensive large scale computations.</li>
+                </ul>
+
+                <br>
+
+                <p>Our PiMD library provides an accessible, flexible, and powerful interface for the Videocore GPU. The main benefits of our library are:</p>
+                <ul>
+                    <li>It is enables developers to take advantage of the GPU without needing an in depth understanding of its architecture. Writing in QPU asssembly requries a sufficient understand of all the subtle rules and restrictions regarding various instructions and registers, as well as how to correctly use the I/O mapped registers.</li>
+                    <li>It exposes the full set of QPU arithmetic instructions, allowing users to define nearly any more complex functions by composing it of lower level operations.</li>
+                    <li>Our library has very low overhead by directly mapping arithmetic operations to their corresponding instruction.  Furthermore, by efficiently scheduling memory fetches and memory stores, we achieve early nearly optimal memory performance.</li>
+                </ul>
+
+                <br>
+
+                <h4>Future Work</h4>
+
+                <p>As mentioned previously, our comparison may be slightly unfair because they CPU and NEON SIMD implementations are single-threaded. It would be insightful to compare the performance of our library, which takes advantage of 8 QPUs, to multi-threaded CPU and NEON SIMD implementations that can take advantage of the Raspberry Pi's quad-core CPU.</p>
+
+                <p>Our results suggest that PiMD may also be well suited for image manipulations, which are often highly data parallel with high arithmetic intensity. Assessing the performance of our library on the following image manipulation algorithm could provide further useful data.</p>
+                <ul>
+                    <li><strong>RGB Manipulation:</strong> Single image tint, shade, color swap, and opacity filters.</li>
+                    <li><strong>Blend Images:</strong> Blend multiple images according to given parameters for each channel.</li>
+                    <li><strong>Edge Detection:</strong> Compute pixel differences implementing edge detection.</li>
                 </ul>
             </div>
         </div>
 
         <br>
-
-        <!--
-        <div class="row">
-            <div class="col-lg-12">
-                <h3>Future Work</h3>
-            </div>
-        </div>
-
-        <br>
-        -->
 
         <div class="row">
             <div class="col-lg-12">

@@ -195,6 +195,22 @@ section.success h1 {
     }
 }
 
+.result > ul {
+    float: left;
+    padding-top: 20px;
+    padding-bottom: 20px;
+    padding-right: 100px;
+}
+
+img.result, img {
+    height: 300px;
+    width: 500px;
+}
+
+.result, br {
+    clear: left;
+}
+
 .btn-outline {
     margin-top: 15px;
     border: solid 2px #fff;
