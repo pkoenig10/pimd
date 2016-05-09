@@ -64,8 +64,8 @@ int flopPimd(int N, int NUM_OPS, float* input, float* result, float *runtime) {
 
 int main(int argc, char** argv) {
     int NUM_REPEAT = 3;
-    int N = 100 * 1000; // 20 M element vectors (~80 MB)
-    int NUM_OPS = 1000; // 100 K operations
+    int N = 1024; // 20 M element vectors (~80 MB)
+    int NUM_OPS = 200 * 1000; // 100 K operations
 
     //
     // Parse command line options
@@ -81,7 +81,7 @@ int main(int argc, char** argv) {
     while ((opt = getopt_long(argc, argv, "?n:o:", long_options, nullptr)) != EOF) {
         switch (opt) {
         case 'n':
-            N = atoi(optarg);
+            NUM_OPS = atoi(optarg);
             break;
         case 'r':
             NUM_REPEAT = atoi(optarg);
@@ -119,7 +119,7 @@ int main(int argc, char** argv) {
         minSerial = std::min(minSerial, ((float)(endTime - startTime))/CLOCKS_PER_SEC);
     }
 
-    printf("[flop Serial]:\t\t[%.3f] ms\t[%.3f] GB/s\t[%.3f] GFLOPS\n",
+    printf("[Flop Serial]:\t\t[%.3f] ms\t[%.3f] GB/s\t[%.3f] GFLOPS\n",
             minSerial * 1000,
             toBW(TOTAL_BYTES, minSerial),
             toGFLOPS(TOTAL_FLOPS, minSerial));
@@ -135,7 +135,7 @@ int main(int argc, char** argv) {
         minNeon = std::min(minNeon, ((float)(endTime - startTime))/CLOCKS_PER_SEC);
     }
 
-    printf("[flop NEON]:\t\t[%.3f] ms\t[%.3f] GB/s\t[%.3f] GFLOPS\n",
+    printf("[Flop NEON]:\t\t[%.3f] ms\t[%.3f] GB/s\t[%.3f] GFLOPS\n",
             minNeon * 1000,
             toBW(TOTAL_BYTES, minNeon),
             toGFLOPS(TOTAL_FLOPS, minNeon));
@@ -154,7 +154,7 @@ int main(int argc, char** argv) {
         minPimd = std::min(minPimd, runtime);
     }
 
-    printf("[flop PI]:\t\t[%.3f] ms\t[%.3f] GB/s\t[%.3f] GFLOPS\n",
+    printf("[Flop PiMD]:\t\t[%.3f] ms\t[%.3f] GB/s\t[%.3f] GFLOPS\n",
             minPimd * 1000,
             toBW(TOTAL_BYTES, minPimd),
             toGFLOPS(TOTAL_FLOPS, minPimd));

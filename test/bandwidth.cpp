@@ -102,7 +102,7 @@ int main(int argc, char** argv) {
         minSerial = std::min(minSerial, ((float)(endTime - startTime))/CLOCKS_PER_SEC);
     }
 
-    printf("[bandwidth Serial]:\t\t[%.3f] ms\t[%.3f] GB/s\t[%.3f] GFLOPS\n",
+    printf("[Bandwidth Serial]:\t\t[%.3f] ms\t[%.3f] GB/s\t[%.3f] GFLOPS\n",
             minSerial * 1000,
             toBW(TOTAL_BYTES, minSerial),
             toGFLOPS(TOTAL_FLOPS, minSerial));
@@ -118,7 +118,7 @@ int main(int argc, char** argv) {
         minNeon = std::min(minNeon, ((float)(endTime - startTime))/CLOCKS_PER_SEC);
     }
 
-    printf("[bandwidth NEON]:\t\t[%.3f] ms\t[%.3f] GB/s\t[%.3f] GFLOPS\n",
+    printf("[Bandwidth NEON]:\t\t[%.3f] ms\t[%.3f] GB/s\t[%.3f] GFLOPS\n",
             minNeon * 1000,
             toBW(TOTAL_BYTES, minNeon),
             toGFLOPS(TOTAL_FLOPS, minNeon));
@@ -137,7 +137,7 @@ int main(int argc, char** argv) {
         minPimd = std::min(minPimd, runtime);
     }
 
-    printf("[bandwidth PI]:\t\t[%.3f] ms\t[%.3f] GB/s\t[%.3f] GFLOPS\n",
+    printf("[Bandwidth PiMD]:\t\t\t[%.3f] ms\t[%.3f] GB/s\t[%.3f] GFLOPS\n",
             minPimd * 1000,
             toBW(TOTAL_BYTES, minPimd),
             toGFLOPS(TOTAL_FLOPS, minPimd));
