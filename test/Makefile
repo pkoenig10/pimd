@@ -1,4 +1,4 @@
-TESTS = bandwidth flop saxpy
+TESTS = bandwidth flop saxpy gaus
 
 BIN = bin
 TARGET = $(addprefix $(BIN)/,$(TESTS))
